@@ -1,0 +1,13 @@
+# OS
+.DS_Store
+
+# 環境変数（秘密情報を含むため）
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+
+# ログ
+*.log
