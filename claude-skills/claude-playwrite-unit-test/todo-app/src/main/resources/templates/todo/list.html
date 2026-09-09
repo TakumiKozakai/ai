@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Todoアプリ</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Todoアプリ</h1>
+
+    <form th:action="@{/todos}" th:object="${newTodo}" method="post" id="todo-form" class="todo-form">
+        <input type="text" th:field="*{title}" id="todo-title-input" placeholder="タイトルを入力"/>
+        <input type="text" th:field="*{description}" id="todo-description-input" placeholder="詳細(任意)"/>
+        <input type="date" th:field="*{dueDate}" id="todo-duedate-input"/>
+        <button type="submit" id="todo-add-button">追加</button>
+        <p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+    </form>
+
+    <ul id="todo-list">
+        <li th:each="todo : ${todos}"
+            th:id="'todo-item-' + ${todo.id}"
+            th:classappend="${todo.status == T(com.example.todo.entity.TodoStatus).DONE} ? 'completed' : ''"
+            class="todo-item">
+            <form th:action="@{/todos/{id}/status(id=${todo.id})}" method="post" class="inline-form">
+                <select name="status" th:id="'todo-status-select-' + ${todo.id}" onchange="this.form.submit()">
+                    <option th:each="s : ${statuses}"
+                            th:value="${s}"
+                            th:text="${s.label}"
+                            th:selected="${s == todo.status}"></option>
+                </select>
+            </form>
+            <span th:text="${todo.title}" th:id="'todo-title-' + ${todo.id}" class="todo-title"></span>
+            <span th:text="${todo.description}" class="todo-description"></span>
+            <span th:text="${todo.dueDate}" th:id="'todo-duedate-' + ${todo.id}" class="todo-duedate"></span>
+            <a th:href="@{/todos/{id}/edit(id=${todo.id})}" th:id="'todo-edit-link-' + ${todo.id}">編集</a>
+            <form th:action="@{/todos/{id}/delete(id=${todo.id})}" method="post" class="inline-form">
+                <button type="submit" th:id="'todo-delete-button-' + ${todo.id}">削除</button>
+            </form>
+        </li>
+    </ul>
+    <p th:if="${#lists.isEmpty(todos)}" id="empty-message">Todoはまだありません</p>
+</div>
+</body>
+</html>

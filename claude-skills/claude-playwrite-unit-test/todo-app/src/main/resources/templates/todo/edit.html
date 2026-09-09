@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo編集</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Todo編集</h1>
+    <form th:action="@{/todos/{id}(id=${todo.id})}" th:object="${todo}" method="post" id="todo-edit-form" class="todo-form">
+        <input type="text" th:field="*{title}" id="todo-edit-title-input"/>
+        <p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+        <input type="text" th:field="*{description}" id="todo-edit-description-input"/>
+        <input type="date" th:field="*{dueDate}" id="todo-edit-duedate-input"/>
+        <select th:field="*{status}" id="todo-edit-status-select">
+            <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}"></option>
+        </select>
+        <button type="submit" id="todo-edit-save-button">保存</button>
+    </form>
+    <a th:href="@{/todos}" id="todo-edit-cancel-link">キャンセルして一覧へ戻る</a>
+</div>
+</body>
+</html>
