@@ -16,7 +16,8 @@
 | | 性能問題検知 | | review-implementation-for-performance | パフォーマンスやリソース消費に悪影響が無いかをRvする |
 | | セキュリティ問題検知 | | review-implementation-for-security | セキュリティ的欠陥が無いかをRvする |
 | 単体試験項目作成 | 画面 | 正常系 | create-unit-case-normal-case | 設計書をもとに正常系項目を起票する |
-| | | 入力チェック | create-unit-case-front-validation<br>create-unit-case-server-validation | 設計書をもとに入力チェック項目を起票する |
+| | | 入力チェック（フロント） | create-unit-case-front-validation | 設計書をもとに入力チェック項目を起票する |
+| | | 入力チェック（サーバ） | create-unit-case-server-validation | 設計書をもとに入力チェック項目を起票する |
 | | | 異常系 | create-unit-case-server-error | 設計書をもとに異常系項目を起票する |
 | | API | 正常系 | | |
 | | | 入力チェック | | |
