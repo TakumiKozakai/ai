@@ -16,7 +16,8 @@
 | | 性能問題検知 | | review-implementation-for-performance | パフォーマンスやリソース消費に悪影響が無いかをRvする |
 | | セキュリティ問題検知 | | review-implementation-for-security | セキュリティ的欠陥が無いかをRvする |
 | 単体試験項目作成 | 画面 | 正常系 | create-unit-case-normal-case | 設計書をもとに正常系項目を起票する |
-| | | 入力チェック | create-unit-case-front-validation<br>create-unit-case-server-validation | 設計書をもとに入力チェック項目を起票する |
+| | | 入力チェック（フロント） | create-unit-case-front-validation | 設計書をもとに入力チェック項目を起票する |
+| | | 入力チェック（サーバ） | create-unit-case-server-validation | 設計書をもとに入力チェック項目を起票する |
 | | | 異常系 | create-unit-case-server-error | 設計書をもとに異常系項目を起票する |
 | | API | 正常系 | | |
 | | | 入力チェック | | |
@@ -25,10 +26,12 @@
 | | | 入力チェック | | |
 | | | 異常系 | | |
 | 単体試験項目Rv | 画面 | 正常系（設計書） | review-unit-case-normal-case | 設計書をもとに正常系項目をRvする |
-| | | 入力チェック（設計書） | review-unit-case-front-validation<br>review-unit-case-server-validation | 設計書をもとに入力チェック項目をRvする |
+| | | 入力チェック（設計書・フロント） | review-unit-case-front-validation | 設計書をもとに入力チェック項目をRvする |
+| | | 入力チェック（設計書・サーバ） | review-unit-case-server-validation | 設計書をもとに入力チェック項目をRvする |
 | | | 異常系（設計書） | review-unit-case-server-error | 設計書をもとに異常系項目をRvする |
 | | | 正常系（ソース） | review-unit-case-normal-case-from-source | ソースをもとに正常系項目をRvする |
-| | | 入力チェック（ソース） | review-unit-case-front-validation-from-source<br>review-unit-case-server-validation-from-source | ソースをもとに入力チェック項目をRvする |
+| | | 入力チェック（ソース・フロント） | review-unit-case-front-validation-from-source | ソースをもとに入力チェック項目をRvする |
+| | | 入力チェック（ソース・サーバ） | review-unit-case-server-validation-from-source | ソースをもとに入力チェック項目をRvする |
 | | | 異常系（ソース） | review-unit-case-server-error-from-source | ソースをもとに異常系項目をRvする |
 | 単体試験項目完成 | 画面 | 正常系 | finalize-unit-case-normal-case | 正常系の試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント |
 | | | 入力チェック（フロント） | finalize-unit-case-front-validation | フロントバリデーションの試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント |
