@@ -1,6 +1,6 @@
 ---
 name: create-unit-case-server-validation
-description: 設計書（自由形式のMarkdown）を読み込み、画面単位の試験項目票のうちサーバ処理内のバリデーション異常系（単項目の境界値チェック、相関項目チェック等）を起票する。レビュー指摘一覧を渡された場合は、既存のサーババリデーション試験項目票に指摘を反映する（指摘反映モード）。「サーババリデーションの試験項目を作って」等の依頼、または create-unit-case-for-screen / finalize-unit-case-server-validation から呼び出されて使用する。
+description: 設計書（自由形式のMarkdown）を読み込み、画面単位の試験項目票のうちサーバ処理内のバリデーション異常系（単項目の境界値チェック、相関項目チェック等）を起票する。レビュー指摘一覧を渡された場合は、既存のサーババリデーション試験項目票に指摘を反映する（指摘反映モード）。「サーババリデーションの試験項目を作って」等の依頼、または finalize-unit-case-server-validation から呼び出されて使用する。
 context: fork
 agent: unit-case-creator
 background: false

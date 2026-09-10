@@ -1,6 +1,6 @@
 ---
 name: review-unit-case-normal-case
-description: 設計書（自由形式のMarkdown）と正常系の試験項目票（試験項目票_{画面名称}_正常系.md）を突き合わせ、正常系観点での抜け・誤り・分類誤りをレビューする。「正常系の試験項目票を設計書でレビューして」等の依頼、または review-unit-case-for-screen / finalize-unit-case-normal-case から呼び出されて使用する。
+description: 設計書（自由形式のMarkdown）と正常系の試験項目票（試験項目票_{画面名称}_正常系.md）を突き合わせ、正常系観点での抜け・誤り・分類誤りをレビューする。「正常系の試験項目票を設計書でレビューして」等の依頼、または finalize-unit-case-normal-case から呼び出されて使用する。
 context: fork
 agent: unit-case-reviewer
 background: false

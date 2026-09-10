@@ -1,6 +1,6 @@
 ---
 name: review-unit-case-server-error-from-source
-description: 対象画面のソースコード（コントローラ・サービス・リポジトリ・例外ハンドラ等）とサーバエラー（異常系）の試験項目票（試験項目票_{画面名称}_03_異常系.md）を突き合わせ、DBエラー・ファイル操作エラー・外部サービスアクセスエラー等の観点での抜け・誤り・分類誤りをレビューする。「サーバエラー系の試験項目票をソースでレビューして」等の依頼、または review-unit-case-for-screen-from-source / finalize-unit-case-server-error から呼び出されて使用する。
+description: 対象画面のソースコード（コントローラ・サービス・リポジトリ・例外ハンドラ等）とサーバエラー（異常系）の試験項目票（試験項目票_{画面名称}_03_異常系.md）を突き合わせ、DBエラー・ファイル操作エラー・外部サービスアクセスエラー等の観点での抜け・誤り・分類誤りをレビューする。「サーバエラー系の試験項目票をソースでレビューして」等の依頼、または finalize-unit-case-server-error から呼び出されて使用する。
 context: fork
 agent: unit-case-reviewer
 background: false

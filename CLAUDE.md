@@ -24,9 +24,6 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 | オーケストレータ | 呼び出す子 skill |
 | --- | --- |
 | `review-implementation` | `review-implementation-against-design-doc` / `-for-bugs` / `-for-performance` / `-for-security` |
-| `create-unit-case-for-screen` | `create-unit-case-normal-case` / `-front-validation` / `-server-validation` / `-server-error` |
-| `review-unit-case-for-screen` | 上記4分類の `review-unit-case-*`（設計書ベース） |
-| `review-unit-case-for-screen-from-source` | 上記4分類の `review-unit-case-*-from-source`（ソースベース） |
 | `finalize-unit-case-normal-case` | 正常系版。`create-unit-case-normal-case`（未作成時のみ）→ サイクルA: `review-unit-case-normal-case` → 作成 skill の指摘反映モード、を収束まで最大5回 → サイクルB: `review-unit-case-normal-case-from-source` で同様に最大5回。分類ごとに独立した finalize |
 | `finalize-unit-case-front-validation` | フロントバリデーション版。構成は `finalize-unit-case-normal-case` と同一で、対象を `create-unit-case-front-validation` / `review-unit-case-front-validation(-from-source)` に差し替えたもの |
 | `finalize-unit-case-server-validation` | サーババリデーション版。構成は `finalize-unit-case-normal-case` と同一で、対象を `create-unit-case-server-validation` / `review-unit-case-server-validation(-from-source)` に差し替えたもの |
@@ -48,7 +45,7 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 
 ### 共通テンプレート
 
-- 試験項目票の雛形: `claude-skills/.claude/skills/create-unit-case-for-screen/references/試験項目票_{画面名称}.md`（No. 採番規則・列の記述方針もここに集約）
+- 試験項目票の雛形: `claude-skills/.claude/skills/create-unit-case-for-screen/references/試験項目票_{画面名称}.md`（No. 採番規則・列の記述方針もここに集約）。`create-unit-case-for-screen` ディレクトリ自体に `SKILL.md` は無い（旧オーケストレータを削除した名残でテンプレートだけが残っている）
 - 試験結果票・レビュー結果 HTML のスタイル: `05_単体試験/claude-playwrite-unit-test/templates/試験結果票_{画面名称}_{yyyyMMddHHmm}.html`
 
 ### skill を新規作成・改修するときの書き方

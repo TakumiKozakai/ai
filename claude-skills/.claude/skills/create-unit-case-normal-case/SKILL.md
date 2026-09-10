@@ -1,6 +1,6 @@
 ---
 name: create-unit-case-normal-case
-description: 設計書（自由形式のMarkdown）を読み込み、画面単位の試験項目票のうち正常系（フロント処理・サーバ処理の正常動作、および正常に受理される境界値）を起票する。レビュー指摘一覧を渡された場合は、既存の正常系試験項目票に指摘を反映する（指摘反映モード）。「正常系の試験項目を作って」等の依頼、または create-unit-case-for-screen / finalize-unit-case-normal-case から呼び出されて使用する。
+description: 設計書（自由形式のMarkdown）を読み込み、画面単位の試験項目票のうち正常系（フロント処理・サーバ処理の正常動作、および正常に受理される境界値）を起票する。レビュー指摘一覧を渡された場合は、既存の正常系試験項目票に指摘を反映する（指摘反映モード）。「正常系の試験項目を作って」等の依頼、または finalize-unit-case-normal-case から呼び出されて使用する。
 context: fork
 agent: unit-case-creator
 background: false

@@ -15,8 +15,7 @@
 | | 潜在バグ検知 | | review-implementation-for-bugs | 潜在的なバグが無いかをRvする |
 | | 性能問題検知 | | review-implementation-for-performance | パフォーマンスやリソース消費に悪影響が無いかをRvする |
 | | セキュリティ問題検知 | | review-implementation-for-security | セキュリティ的欠陥が無いかをRvする |
-| 単体試験項目作成 | 画面 | 統合 | create-unit-case-for-screen | 設計書をもとに下記3分類の試験票をまとめて作成する（オーケストレータ） |
-| | | 正常系 | create-unit-case-normal-case | 設計書をもとに正常系項目を起票する |
+| 単体試験項目作成 | 画面 | 正常系 | create-unit-case-normal-case | 設計書をもとに正常系項目を起票する |
 | | | 入力チェック | create-unit-case-front-validation<br>create-unit-case-server-validation | 設計書をもとに入力チェック項目を起票する |
 | | | 異常系 | create-unit-case-server-error | 設計書をもとに異常系項目を起票する |
 | | API | 正常系 | | |
@@ -25,14 +24,12 @@
 | | バッチ | 正常系 | | |
 | | | 入力チェック | | |
 | | | 異常系 | | |
-| 単体試験項目Rv | 画面 | 統合 | review-unit-case-for-screen | 設計書をもとに下記3分類の試験票をまとめてRvする（オーケストレータ） |
-| | | 正常系 | review-unit-case-normal-case | 設計書をもとに正常系項目をRvする |
-| | | 入力チェック | review-unit-case-front-validation<br>review-unit-case-server-validation | 設計書をもとに入力チェック項目をRvする |
-| | | 異常系 | review-unit-case-server-error | 設計書をもとに異常系項目をRvする |
-| | | 統合 | review-unit-case-for-screen-from-source | ソースをもとに下記3分類の試験票をまとめてRvする（オーケストレータ） |
-| | | 正常系 | review-unit-case-normal-case-from-source | ソースをもとに正常系項目をRvする |
-| | | 入力チェック | review-unit-case-front-validation-from-source<br>review-unit-case-server-validation-from-source | ソースをもとに入力チェック項目をRvする |
-| | | 異常系 | review-unit-case-server-error-from-source | ソースをもとに異常系項目をRvする |
+| 単体試験項目Rv | 画面 | 正常系（設計書） | review-unit-case-normal-case | 設計書をもとに正常系項目をRvする |
+| | | 入力チェック（設計書） | review-unit-case-front-validation<br>review-unit-case-server-validation | 設計書をもとに入力チェック項目をRvする |
+| | | 異常系（設計書） | review-unit-case-server-error | 設計書をもとに異常系項目をRvする |
+| | | 正常系（ソース） | review-unit-case-normal-case-from-source | ソースをもとに正常系項目をRvする |
+| | | 入力チェック（ソース） | review-unit-case-front-validation-from-source<br>review-unit-case-server-validation-from-source | ソースをもとに入力チェック項目をRvする |
+| | | 異常系（ソース） | review-unit-case-server-error-from-source | ソースをもとに異常系項目をRvする |
 | 単体試験項目完成 | 画面 | 正常系 | finalize-unit-case-normal-case | 正常系の試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント |
 | | | 入力チェック（フロント） | finalize-unit-case-front-validation | フロントバリデーションの試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント |
 | | | 入力チェック（サーバ） | finalize-unit-case-server-validation | サーババリデーションの試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント |
@@ -106,7 +103,7 @@
 - `$ARGUMENTS` は「通常モード」と「指摘反映モード」で内容が異なる
   - 通常モード: 設計書ファイルパス（必須）、出力先ディレクトリ（省略可）
   - 指摘反映モード: 設計書ファイルパス、出力先ディレクトリ、指摘一覧（種別・対象No.・シナリオ・指摘内容・根拠）、照合元（設計書／ソース。ソースの場合はソースファイルパス）、確認済み回答（あれば）。指摘一覧と照合元の両方が含まれていれば指摘反映モードとして動作する
-- 単体で `/create-unit-case-normal-case 03_詳細設計/todo-app設計書.md` のように直接呼び出すことも、`create-unit-case-for-screen` や `finalize-unit-case-normal-case` から呼び出されることもある
+- 単体で `/create-unit-case-normal-case 03_詳細設計/todo-app設計書.md` のように直接呼び出すことも、`finalize-unit-case-normal-case` から呼び出されることもある
 - `context: fork` / `agent: unit-case-creator` / `background: false` の子skillのため、Skill ツール経由で呼ぶと Sonnet のサブエージェントとして分離実行される
 
 #### Skillの詳細
@@ -162,7 +159,7 @@
 #### 使い方
 
 - 引数: 設計書ファイルパス（必須）、試験項目票ディレクトリ（省略可。省略時は設計書と同じディレクトリ）
-- 大元skill（`review-unit-case-for-screen` / `finalize-unit-case-normal-case`）から呼ぶ場合は「集約実行」であることと画面名称・確認済み回答・未解決事項を明示して渡す。明示が無ければ単体実行として振る舞う
+- 大元skill（`finalize-unit-case-normal-case`）から呼ぶ場合は「集約実行」であることと画面名称・確認済み回答・未解決事項を明示して渡す。明示が無ければ単体実行として振る舞う
 - `context: fork` / `agent: unit-case-reviewer` / `background: false` の子skillのため、Skill ツール経由で呼ぶと Opus のサブエージェントとして分離実行される
 
 #### Skillの詳細

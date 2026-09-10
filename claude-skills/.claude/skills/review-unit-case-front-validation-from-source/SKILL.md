@@ -1,6 +1,6 @@
 ---
 name: review-unit-case-front-validation-from-source
-description: 対象画面のソースコード（テンプレート・JS等）とフロントバリデーションの試験項目票（試験項目票_{画面名称}_01_フロントバリデーション.md）を突き合わせ、フロント処理内の入力チェック観点での抜け・誤り・分類誤りをレビューする。「フロントバリデーションの試験項目票をソースでレビューして」等の依頼、または review-unit-case-for-screen-from-source / finalize-unit-case-front-validation から呼び出されて使用する。
+description: 対象画面のソースコード（テンプレート・JS等）とフロントバリデーションの試験項目票（試験項目票_{画面名称}_01_フロントバリデーション.md）を突き合わせ、フロント処理内の入力チェック観点での抜け・誤り・分類誤りをレビューする。「フロントバリデーションの試験項目票をソースでレビューして」等の依頼、または finalize-unit-case-front-validation から呼び出されて使用する。
 context: fork
 agent: unit-case-reviewer
 background: false
