@@ -34,6 +34,6 @@
 | | | 異常系 | ソースをもとに異常系項目をRvする | review-unit-case-server-error-from-source |
 | 単体試験項目完成 | 画面 | 正常系 | 正常系の試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント | finalize-unit-case-normal-case |
 | | | 入力チェック（フロント） | フロントバリデーションの試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント | finalize-unit-case-front-validation |
-| | | 入力チェック（サーバ） | （後日）サーババリデーションの finalize | |
-| | | 異常系 | （後日）サーバエラーの finalize | |
+| | | 入力チェック（サーバ） | サーババリデーションの試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント | finalize-unit-case-server-validation |
+| | | 異常系 | サーバエラーの試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント | finalize-unit-case-server-error |
 | 単体試験実施 | | | 試験票をもとに試験実施する | run-playwright-unit-test |
