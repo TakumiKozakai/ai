@@ -1,6 +1,6 @@
 ---
 name: review-unit-case-normal-case-from-source
-description: 対象画面のソースコード（テンプレート・コントローラ等）と正常系の試験項目票（試験項目票_{画面名称}_正常系.md）を突き合わせ、正常系観点での抜け・誤り・分類誤りをレビューする。「正常系の試験項目票をソースでレビューして」等の依頼、または review-unit-case-for-screen-from-source / finalize-unit-case-normal-case から呼び出されて使用する。
+description: 対象画面のソースコード（テンプレート・コントローラ等）と正常系の試験項目票（試験項目票_{画面名称}_正常系.md）を突き合わせ、正常系観点での抜け・誤り・分類誤りをレビューする。「正常系の試験項目票をソースでレビューして」等の依頼、または finalize-unit-case-normal-case から呼び出されて使用する。
 context: fork
 agent: unit-case-reviewer
 background: false

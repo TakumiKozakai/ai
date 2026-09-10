@@ -1,6 +1,6 @@
 ---
 name: review-unit-case-server-validation-from-source
-description: 対象画面のソースコード（コントローラ・フォームクラス・バリデーション定義等）とサーババリデーションの試験項目票（試験項目票_{画面名称}_02_サーババリデーション.md）を突き合わせ、サーバ処理内の入力チェック観点での抜け・誤り・分類誤りをレビューする。「サーババリデーションの試験項目票をソースでレビューして」等の依頼、または review-unit-case-for-screen-from-source / finalize-unit-case-server-validation から呼び出されて使用する。
+description: 対象画面のソースコード（コントローラ・フォームクラス・バリデーション定義等）とサーババリデーションの試験項目票（試験項目票_{画面名称}_02_サーババリデーション.md）を突き合わせ、サーバ処理内の入力チェック観点での抜け・誤り・分類誤りをレビューする。「サーババリデーションの試験項目票をソースでレビューして」等の依頼、または finalize-unit-case-server-validation から呼び出されて使用する。
 context: fork
 agent: unit-case-reviewer
 background: false

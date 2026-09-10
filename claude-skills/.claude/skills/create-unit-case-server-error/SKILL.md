@@ -1,6 +1,6 @@
 ---
 name: create-unit-case-server-error
-description: 設計書（自由形式のMarkdown）を読み込み、画面単位の試験項目票のうちサーバ処理内のエラー（DBエラー、ファイル操作エラー、AWSサービスアクセスエラー等）を起票する。レビュー指摘一覧を渡された場合は、既存のサーバエラー試験項目票に指摘を反映する（指摘反映モード）。「サーバエラー系の試験項目を作って」等の依頼、または create-unit-case-for-screen / finalize-unit-case-server-error から呼び出されて使用する。
+description: 設計書（自由形式のMarkdown）を読み込み、画面単位の試験項目票のうちサーバ処理内のエラー（DBエラー、ファイル操作エラー、AWSサービスアクセスエラー等）を起票する。レビュー指摘一覧を渡された場合は、既存のサーバエラー試験項目票に指摘を反映する（指摘反映モード）。「サーバエラー系の試験項目を作って」等の依頼、または finalize-unit-case-server-error から呼び出されて使用する。
 context: fork
 agent: unit-case-creator
 background: false

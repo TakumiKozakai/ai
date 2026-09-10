@@ -1,6 +1,6 @@
 ---
 name: review-unit-case-server-validation
-description: 設計書（自由形式のMarkdown）とサーババリデーションの試験項目票（試験項目票_{画面名称}_02_サーババリデーション.md）を突き合わせ、サーバ処理内の入力チェック観点での抜け・誤り・分類誤りをレビューする。「サーババリデーションの試験項目票を設計書でレビューして」等の依頼、または review-unit-case-for-screen / finalize-unit-case-server-validation から呼び出されて使用する。
+description: 設計書（自由形式のMarkdown）とサーババリデーションの試験項目票（試験項目票_{画面名称}_02_サーババリデーション.md）を突き合わせ、サーバ処理内の入力チェック観点での抜け・誤り・分類誤りをレビューする。「サーババリデーションの試験項目票を設計書でレビューして」等の依頼、または finalize-unit-case-server-validation から呼び出されて使用する。
 context: fork
 agent: unit-case-reviewer
 background: false
