@@ -27,8 +27,10 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 | `create-unit-case-for-screen` | `create-unit-case-normal-case` / `-front-validation` / `-server-validation` / `-server-error` |
 | `review-unit-case-for-screen` | 上記4分類の `review-unit-case-*`（設計書ベース） |
 | `review-unit-case-for-screen-from-source` | 上記4分類の `review-unit-case-*-from-source`（ソースベース） |
-| `finalize-unit-case-normal-case` | 正常系版。`create-unit-case-normal-case`（未作成時のみ）→ サイクルA: `review-unit-case-normal-case` → 作成 skill の指摘反映モード、を収束まで最大5回 → サイクルB: `review-unit-case-normal-case-from-source` で同様に最大5回。分類ごとに独立した finalize（サーババリデーション・サーバエラーは後日同じ型で追加） |
+| `finalize-unit-case-normal-case` | 正常系版。`create-unit-case-normal-case`（未作成時のみ）→ サイクルA: `review-unit-case-normal-case` → 作成 skill の指摘反映モード、を収束まで最大5回 → サイクルB: `review-unit-case-normal-case-from-source` で同様に最大5回。分類ごとに独立した finalize |
 | `finalize-unit-case-front-validation` | フロントバリデーション版。構成は `finalize-unit-case-normal-case` と同一で、対象を `create-unit-case-front-validation` / `review-unit-case-front-validation(-from-source)` に差し替えたもの |
+| `finalize-unit-case-server-validation` | サーババリデーション版。構成は `finalize-unit-case-normal-case` と同一で、対象を `create-unit-case-server-validation` / `review-unit-case-server-validation(-from-source)` に差し替えたもの |
+| `finalize-unit-case-server-error` | サーバエラー版。構成は `finalize-unit-case-normal-case` と同一で、対象を `create-unit-case-server-error` / `review-unit-case-server-error(-from-source)` に差し替えたもの |
 
 ### 2系統の入力と成果物
 
@@ -41,10 +43,10 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 
 ### 実行モードとサブエージェント
 
-- **集約実行**: 親 skill から「集約実行」と明示して呼ばれた場合、子 skill は HTML を作らず、指摘一覧・実行状態・未確認観点を親に返す。明示が無ければ単体実行として振る舞う。正常系・フロントバリデーションの子 skill はサブエージェントとして動くため（`AskUserQuestion` はサブエージェントで使えない）、単体実行でもユーザーに質問せず、確認したい内容を「要確認事項」「未確認観点」として返す。呼び出し元（finalize、または人と対話しているセッション）がユーザーに確認して「確認済み回答」として次の呼び出しに渡す。
+- **集約実行**: 親 skill から「集約実行」と明示して呼ばれた場合、子 skill は HTML を作らず、指摘一覧・実行状態・未確認観点を親に返す。明示が無ければ単体実行として振る舞う。正常系・フロントバリデーション・サーババリデーション・サーバエラーの子 skill はサブエージェントとして動くため（`AskUserQuestion` はサブエージェントで使えない）、単体実行でもユーザーに質問せず、確認したい内容を「要確認事項」「未確認観点」として返す。呼び出し元（finalize、または人と対話しているセッション）がユーザーに確認して「確認済み回答」として次の呼び出しに渡す。
 - **指摘反映モード**: 分類別作成 skill は「指摘一覧」と「照合元（設計書／ソース）」を渡されると、新規作成ではなく既存の自分の分類の試験項目票へ指摘を反映する。対象行は No. とシナリオで特定し、曖昧なら要確認事項に回す。他分類に属する行は削除せず報告のみ。
-- **モデル分離（`context: fork`）**: 正常系の `create-unit-case-normal-case` と `review-unit-case-normal-case(-from-source)` は frontmatter の `context: fork` / `agent` / `background: false` で、`.claude/agents/` のサブエージェント（`unit-case-creator` = Sonnet、`unit-case-reviewer` = Opus）として分離実行される。fork は親の会話を見ないので、必要な情報はすべて引数で渡す。finalize からは必ず Skill ツールで呼ぶ（SKILL.md を読んで自分で実行するとモデル分離が効かない）。モデルは agent 定義に一本化し、skill 側には書かない。
-- サーババリデーション・サーバエラーの作成 skill の指摘反映モードは旧設計（指摘ID・原文・ファイル間移動を含む）のまま残っており、分類別 finalize を追加する際に正常系・フロントバリデーションと同じ型へ簡素化する予定。
+- **モデル分離（`context: fork`）**: 正常系の `create-unit-case-normal-case` と `review-unit-case-normal-case(-from-source)` は frontmatter の `context: fork` / `agent` / `background: false` で、`.claude/agents/` のサブエージェント（`unit-case-creator` = Sonnet、`unit-case-reviewer` = Opus）として分離実行される。フロントバリデーション・サーババリデーション・サーバエラーの対応する作成/レビュー skill も同じ構成。fork は親の会話を見ないので、必要な情報はすべて引数で渡す。finalize からは必ず Skill ツールで呼ぶ（SKILL.md を読んで自分で実行するとモデル分離が効かない）。モデルは agent 定義に一本化し、skill 側には書かない。
+- 4分類（正常系・フロントバリデーション・サーババリデーション・サーバエラー）すべての作成/レビュー/finalize skill が揃っている。
 
 ### 共通テンプレート
 
