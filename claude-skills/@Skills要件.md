@@ -19,7 +19,6 @@
 | | | 正常系 | create-unit-case-normal-case | 設計書をもとに正常系項目を起票する |
 | | | 入力チェック | create-unit-case-front-validation<br>create-unit-case-server-validation | 設計書をもとに入力チェック項目を起票する |
 | | | 異常系 | create-unit-case-server-error | 設計書をもとに異常系項目を起票する |
-| | | 全分類 | create-unit-case-for-screen-from-source | ソースをもとに試験票を作成する |
 | | API | 正常系 | | |
 | | | 入力チェック | | |
 | | | 異常系 | | |
