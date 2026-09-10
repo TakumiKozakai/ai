@@ -33,5 +33,5 @@ description: 設計書ファイルパス・比較基準となるコミットID�
 
 - 設計書自体の作成・更新は行わない
 - 実装（implement-from-design-doc / implement-from-design-doc-diff）との統合は行わない
-- 試験項目票レビュー（review-unit-testcase）との統合は行わない
+- 試験項目票レビュー（review-unit-case-for-screen 等）との統合は行わない
 - 検出した指摘の自動修正は行わない（レビューのみ）

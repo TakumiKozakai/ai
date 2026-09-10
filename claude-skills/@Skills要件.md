@@ -1,6 +1,6 @@
 # Skills要件
 
-| 大分類 | 中分類 | 小分類 | 内容 | Skill名 |
+| 大分類 | 中分類 | 小分類 | 内容 | Skill名/使い方 |
 | --- | --- | --- | --- | --- |
 | 設計 | 詳細設計 | | 設計書執筆 | |
 | 設計Rv | | | 設計書Rv用 | |
@@ -13,25 +13,26 @@
 | | 潜在バグ検知 | | 潜在的なバグが無いかをRvする | review-implementation-for-bugs |
 | | 性能問題検知 | | パフォーマンスやリソース消費に悪影響が無いかをRvする | review-implementation-for-performance |
 | | セキュリティ問題検知 | | セキュリティ的欠陥が無いかをRvする | review-implementation-for-security |
-| 単体試験項目作成 | 画面 | 統合 | 設計書をもとに下記3分類の試験票をまとめて作成する（オーケストレータ） | create-unit-testcase-for-screen |
-| | | 正常系 | 設計書をもとに試験票を作成する | create-unit-testcase-normal-case |
-| | | 入力チェック | 設計書をもとに試験票を作成する | create-unit-testcase-front-validation, create-unit-testcase-server-validation |
-| | | 異常系 | | create-unit-testcase-server-error |
-| | | 全分類 | ソースをもとに試験票を作成する | create-unit-testcase-for-screen-from-source |
+| 単体試験項目作成 | 画面 | 統合 | 設計書をもとに下記3分類の試験票をまとめて作成する（オーケストレータ） | create-unit-case-for-screen |
+| | | 正常系 | 設計書をもとに正常系項目を起票する | create-unit-case-normal-case |
+| | | 入力チェック | 設計書をもとに入力チェック項目を起票する | create-unit-case-front-validation<br>create-unit-case-server-validation |
+| | | 異常系 | 設計書をもとに異常系項目を起票する | create-unit-case-server-error |
+| | | 全分類 | ソースをもとに試験票を作成する | create-unit-case-for-screen-from-source |
 | | API | 正常系 | | |
 | | | 入力チェック | | |
 | | | 異常系 | | |
 | | バッチ | 正常系 | | |
 | | | 入力チェック | | |
 | | | 異常系 | | |
-| 単体試験項目Rv | 画面 | 統合 | 設計書をもとに下記3分類の試験票をまとめてRvする（オーケストレータ） | review-unit-testcase-for-screen |
-| | | 正常系 | 設計書をもとに試験票をRvする | review-unit-testcase-normal-case |
-| | | 入力チェック | 設計書をもとに試験票をRvする | review-unit-testcase-front-validation, review-unit-testcase-server-validation |
-| | | 異常系 | 設計書をもとに試験票をRvする | review-unit-testcase-server-error |
-| | | 統合 | ソースをもとに下記3分類の試験票をまとめてRvする（オーケストレータ） | review-unit-testcase-for-screen-from-source |
-| | | 正常系 | ソースをもとに試験票をRvする | review-unit-testcase-normal-case-from-source |
-| | | 入力チェック | ソースをもとに試験票をRvする | review-unit-testcase-front-validation-from-source, review-unit-testcase-server-validation-from-source |
-| | | 異常系 | ソースをもとに試験票をRvする | review-unit-testcase-server-error-from-source |
-| | | 全分類 | ソースをもとに試験票（単一ファイル形式）をRvする | review-unit-testcase |
-| 単体試験項目完成 | 画面試験 | | ソースをもとに試験票を未作成時に作成し、Rv・修正を指摘0件または最大5回まで繰り返す | finalize-unit-testcase-for-screen |
+| 単体試験項目Rv | 画面 | 統合 | 設計書をもとに下記3分類の試験票をまとめてRvする（オーケストレータ） | review-unit-case-for-screen |
+| | | 正常系 | 設計書をもとに正常系項目をRvする | review-unit-case-normal-case |
+| | | 入力チェック | 設計書をもとに入力チェック項目をRvする | review-unit-case-front-validation<br>review-unit-case-server-validation |
+| | | 異常系 | 設計書をもとに異常系項目をRvする | review-unit-case-server-error |
+| | | 統合 | ソースをもとに下記3分類の試験票をまとめてRvする（オーケストレータ） | review-unit-case-for-screen-from-source |
+| | | 正常系 | ソースをもとに正常系項目をRvする | review-unit-case-normal-case-from-source |
+| | | 入力チェック | ソースをもとに入力チェック項目をRvする | review-unit-case-front-validation-from-source<br>review-unit-case-server-validation-from-source |
+| | | 異常系 | ソースをもとに異常系項目をRvする | review-unit-case-server-error-from-source |
+| 単体試験項目完成 | 画面 | 正常系 | 正常系の試験票を未作成時に設計書から作成し、設計書Rv→ソースRvの順に、Rv→指摘反映を収束または各最大5回まで繰り返す。作成・反映はSonnet、RvはOpusのサブエージェント | finalize-unit-case-normal-case |
+| | | 入力チェック | （後日）フロント／サーババリデーションの finalize | |
+| | | 異常系 | （後日）サーバエラーの finalize | |
 | 単体試験実施 | | | 試験票をもとに試験実施する | run-playwright-unit-test |
