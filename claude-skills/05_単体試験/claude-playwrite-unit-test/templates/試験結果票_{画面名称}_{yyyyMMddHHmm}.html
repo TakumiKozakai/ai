@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>{画面名称} {分類} 試験結果</title>
+<style>
+  body { font-family: sans-serif; margin: 2em; }
+  table { border-collapse: collapse; width: 100%; max-width: 800px; }
+  th, td { border: 1px solid #ccc; padding: 0.5em 1em; text-align: left; }
+  th { background: #f0f0f0; }
+</style>
+</head>
+<body>
+<h1>{画面名称} {分類} 試験結果</h1>
+<table>
+  <thead>
+    <tr><th>No.</th><th>シナリオ</th><th>実施日</th><th>OK/NG</th></tr>
+  </thead>
+  <tbody>
+    <!-- 対応する 試験項目票_{画面名称}_{分類}.md のNo.ごとに1行ずつ追加する。未実施の項目は OK/NG 欄に「未実施（理由）」と記載する -->
+    <!-- <tr><td>{No.}</td><td>{シナリオ}</td><td>{実施日 yyyy/MM/dd HH:mm}</td><td>OK または NG または 未実施（理由）</td></tr> -->
+  </tbody>
+</table>
+</body>
+</html>
