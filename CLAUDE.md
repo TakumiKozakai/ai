@@ -17,47 +17,51 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 
 ## skill アーキテクチャ
 
-### オーケストレータ／リーフ構成
+### オーケストレータ／リーフ構成（コードレビュー系）
 
-既存のオーケストレータ skill（下表の finalize 以外）は子 skill の `SKILL.md` を順に Read し、その手順に従って実行する（ファイル読み込みによる委譲。同一モデル・同一コンテキスト）。finalize だけは例外で、モデル分離のため子 skill を Skill ツールで呼ぶ（後述）。子の1つが失敗しても後続は継続し、最後に分類ごとの実行状態（成功／未実施／失敗）と指摘件数を集約して報告する。未実施・失敗分は指摘件数に含めない。
+`review-implementation` は子 skill（`review-implementation-against-design-doc` / `-for-bugs` / `-for-performance` / `-for-security`）の `SKILL.md` を順に Read し、その手順に従って実行する（ファイル読み込みによる委譲。同一モデル・同一コンテキスト）。子の1つが失敗しても後続は継続し、最後に観点ごとの実行状態（成功／未実施／失敗）と指摘件数を集約して報告する。未実施・失敗分は指摘件数に含めない。
 
-| オーケストレータ | 呼び出す子 skill |
-| --- | --- |
-| `review-implementation` | `review-implementation-against-design-doc` / `-for-bugs` / `-for-performance` / `-for-security` |
-| `finalize-unit-case-normal-case` | 正常系版。`create-unit-case-normal-case`（未作成時のみ）→ サイクルA: `review-unit-case-normal-case` → 作成 skill の指摘反映モード、を収束まで最大5回 → サイクルB: `review-unit-case-normal-case-from-source` で同様に最大5回。分類ごとに独立した finalize |
-| `finalize-unit-case-front-validation` | フロントバリデーション版。構成は `finalize-unit-case-normal-case` と同一で、対象を `create-unit-case-front-validation` / `review-unit-case-front-validation(-from-source)` に差し替えたもの |
-| `finalize-unit-case-server-validation` | サーババリデーション版。構成は `finalize-unit-case-normal-case` と同一で、対象を `create-unit-case-server-validation` / `review-unit-case-server-validation(-from-source)` に差し替えたもの |
-| `finalize-unit-case-server-error` | サーバエラー版。構成は `finalize-unit-case-normal-case` と同一で、対象を `create-unit-case-server-error` / `review-unit-case-server-error(-from-source)` に差し替えたもの |
+### 単体試験項目票の Writer/Reviewer 構成
 
-### 2系統の入力と成果物
+単体試験項目票は skill ではなく **エージェントが入口** になる。ユーザーはメインセッションで `unit-case-writer` に設計書パスを添えて「試験項目票を作って」と頼むだけで、分類の指定はしない（`@"unit-case-writer (agent)"` メンションでも呼べる）。対象画面機能（イベント。例:「登録ボタン押下」）を添えると、4分類ともその機能に絞って作成・レビューし、既存の票には該当機能の行だけをマージする（他機能の既存行は保持。画面全体の網羅性は保証しない）。
 
-作成 skill（`create-unit-case-*`）は設計書ベースのみで、試験分類別に4ファイル `試験項目票_{画面名称}_正常系.md` / `_01_フロントバリデーション.md` / `_02_サーババリデーション.md` / `_03_異常系.md` を出力する（出力先は既定で設計書と同じディレクトリ）。
+```
+メインセッション ─Agent ツール─▶ unit-case-writer（Sonnet）
+   ▲ 要判断で停止 → ユーザーに確認 →   │ Skill: write-unit-case-*（4分類）で作成・指摘反映
+   └ SendMessage で再開 ───────────    ├─Agent ツール（初回）／SendMessage（2回目以降）─▶ unit-case-reviewer（Opus・1起動）
+                                        │   ◀── 分類別の指摘一覧・要確認事項 ──   │ Skill: review-unit-case-*（4分類）
+                                        ▼ 指摘が無くなるまで最大3回 → 完了報告
+```
 
-- レビュー skill には設計書ベースとソースベース（`-from-source` 接尾辞）の両方があり、どちらも同じ分類別4ファイルを対象にする。照合元がソースになるだけで成果物の形式は変わらない。
-- レビュー結果 HTML: 単体実行では指摘が1件以上あるときだけ作成する（0件ならチャット報告のみ）。集約実行では作成しない。finalize は上限打ち切り時のみ作成する。
+- **`unit-case-writer`**（`.claude/agents/unit-case-writer.md`、Sonnet）: 4分類の `write-unit-case-*` を Skill ツールで順に実行して4ファイルを作り、`unit-case-reviewer` を Agent ツールで起動してレビューさせ、返った指摘を `write-unit-case-*` の指摘反映モードで反映する。これを4ファイルとも指摘が無くなるまで最大3回繰り返す。3回目で残った指摘は反映せず報告し、そのときだけ `試験項目票レビュー結果_{画面名称}_完成_{yyyyMMddHHmm}.html` を作る。「他分類への移動が必要な行」は Writer が移動先へ「抜け（新規）」で追加させ、移動元へ「削除」を指示して自分で動かす。
+- **`unit-case-reviewer`**（`.claude/agents/unit-case-reviewer.md`、Opus、`disallowedTools: Edit, NotebookEdit, Agent`）: 同じ実行の中では **1起動** で、Writer が `SendMessage` で再開して続けてレビューさせる（同じ人がずっとレビューするイメージ）。再開時は記憶ではなくファイルを再読してレビューする。ユーザーが「試験項目票_◯◯_01_正常系.md を設計書でレビューして」と単体レビューを頼むときも、この Reviewer を直接呼ぶ。
+- **skill は手順書**: `write-unit-case-*` / `review-unit-case-*` は `context: fork` を持たず `user-invocable: false`。エージェントが Skill ツールで自分のコンテキストに読み込んで実行する。モデルは agent 定義だけで決まり、skill 側には書かない。単体の「作成だけ」は無い。
+- **ユーザー確認の往復**: `AskUserQuestion` はサブエージェントでは使えないため、Writer・Reviewer はユーザーに質問しない。判断が必要な事項（要確認事項・上書き可否・失敗時の対応）は Writer が `【要判断】` として結果に返して止まる。メインセッションはそれをユーザーに確認し、回答を「確認済み回答」（判断できない事項は「保留」、中止は「中止」）として Writer の agent ID 宛に `SendMessage` で送る。Writer は同じ位置から再開する。再開できない場合は確認済み回答を添えて Writer を新規起動すれば、既存ファイルを使ってサイクルを最初からやり直す。
+- **入れ子の前提**: メイン → Writer → Reviewer で2階層のサブエージェント入れ子を使う。Claude Code 既定（3階層）で動く。`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` を 1 にすると Writer が Reviewer を起動できない。
+- **レビューは設計書ベースのみ**。ソースコードを照合元にするレビューは廃止した（旧 `review-unit-case-*-from-source`）。Writer・Reviewer ともローカルファイルの静的解析だけで動き、実行中アプリ・DB・MCP・外部サービスには接続しない。
 
-### 実行モードとサブエージェント
+### 成果物
 
-- **集約実行**: 親 skill から「集約実行」と明示して呼ばれた場合、子 skill は HTML を作らず、指摘一覧・実行状態・未確認観点を親に返す。明示が無ければ単体実行として振る舞う。正常系・フロントバリデーション・サーババリデーション・サーバエラーの子 skill はサブエージェントとして動くため（`AskUserQuestion` はサブエージェントで使えない）、単体実行でもユーザーに質問せず、確認したい内容を「要確認事項」「未確認観点」として返す。呼び出し元（finalize、または人と対話しているセッション）がユーザーに確認して「確認済み回答」として次の呼び出しに渡す。
-- **指摘反映モード**: 分類別作成 skill は「指摘一覧」と「照合元（設計書／ソース）」を渡されると、新規作成ではなく既存の自分の分類の試験項目票へ指摘を反映する。対象行は No. とシナリオで特定し、曖昧なら要確認事項に回す。他分類に属する行は削除せず報告のみ。
-- **モデル分離（`context: fork`）**: 正常系の `create-unit-case-normal-case` と `review-unit-case-normal-case(-from-source)` は frontmatter の `context: fork` / `agent` / `background: false` で、`.claude/agents/` のサブエージェント（`unit-case-creator` = Sonnet、`unit-case-reviewer` = Opus）として分離実行される。フロントバリデーション・サーババリデーション・サーバエラーの対応する作成/レビュー skill も同じ構成。fork は親の会話を見ないので、必要な情報はすべて引数で渡す。finalize からは必ず Skill ツールで呼ぶ（SKILL.md を読んで自分で実行するとモデル分離が効かない）。モデルは agent 定義に一本化し、skill 側には書かない。
-- 4分類（正常系・フロントバリデーション・サーババリデーション・サーバエラー）すべての作成/レビュー/finalize skill が揃っている。
+`write-unit-case-*` は試験分類別に4ファイル `試験項目票_{画面名称}_01_正常系.md` / `_02_異常系.md` / `_03_フロントバリデーション.md` / `_04_サーババリデーション.md` を出力する（出力先は既定で設計書と同じディレクトリ）。分類と skill の対応は `01_正常系` = `normal-case`、`02_異常系` = `server-error`、`03_フロントバリデーション` = `front-validation`、`04_サーババリデーション` = `server-validation`。
+
+- **指摘反映モード**: `write-unit-case-*` は「指摘一覧」を渡されると、新規作成ではなく既存の自分の分類の試験項目票へ指摘を反映する。対象行は No. とシナリオで特定し、曖昧なら要確認事項に回す。他分類に属する行は削除せず行の全内容を添えて報告し、移動は Writer が行う。種別「削除」は Writer からの移動指示専用。
+- **集約実行**: Writer から「集約実行」と明示して呼ばれた場合、`review-unit-case-*` は HTML を作らず、指摘一覧・実行状態・要確認事項を返す。明示が無い（ユーザーが Reviewer を直接呼んだ）単体実行では、指摘が1件以上あるときだけ `試験項目票レビュー結果_{画面名称}_{分類}_設計書_{yyyyMMddHHmm}.html` を作る（0件ならチャット報告のみ）。
 
 ### 共通テンプレート
 
-- 試験項目票の雛形: `claude-skills/.claude/skills/create-unit-case-for-screen/references/試験項目票_{画面名称}.md`（No. 採番規則・列の記述方針もここに集約）。`create-unit-case-for-screen` ディレクトリ自体に `SKILL.md` は無い（旧オーケストレータを削除した名残でテンプレートだけが残っている）
+- 試験項目票の雛形: `05_単体試験/claude-playwrite-unit-test/templates/試験項目票_{画面名称}.md`（No. 採番規則・列の記述方針もここに集約）。`write-unit-case-*` が通常モードの手順3で Read する
 - 試験結果票・レビュー結果 HTML のスタイル: `05_単体試験/claude-playwrite-unit-test/templates/試験結果票_{画面名称}_{yyyyMMddHHmm}.html`
 
 ### skill を新規作成・改修するときの書き方
 
 既存 skill に合わせて以下を踏襲する。
 
-- frontmatter は `name` / `description`。description は日本語で、発火フレーズ例（「〜して」）と他 skill との違いを含める。
-- 本文は `$ARGUMENTS` から入力を読む番号付き手順。不足・曖昧な入力は独断で補わずユーザーに確認し、既存ファイルの上書き前にも確認する。
+- frontmatter は `name` / `description`。description は日本語で、発火フレーズ例（「〜して」）と他 skill との違いを含める。エージェント専用の手順書 skill（`write-unit-case-*` / `review-unit-case-*`）は `user-invocable: false` を付け、description に発火フレーズではなく「どのエージェントが実行するか」を書く。
+- 本文は `$ARGUMENTS` から入力を読む番号付き手順。不足・曖昧な入力は独断で補わずユーザーに確認し、既存ファイルの上書き前にも確認する。サブエージェント内で動く skill・エージェントは質問できないので、「要確認事項」「要判断」として結果に返す。
 - 末尾に「スコープ外」セクションを置き、他 skill との境界を明記する。
 - 試験項目票では画面要素を物理名（id・class）ではなく論理名（表示ラベル・ボタン文言）で書く。No. は画面内 1 始まりの連番で、実行可能な順（非永続→登録→境界値→削除・0件確認を最後）に並べる。
 - 実装・レビュー系 skill は「実装先プロジェクトは設計書の場所と一致しない」前提でユーザーに確認する。差分系（`-diff`、`review-implementation`）は比較基準のコミット ID を自動提案しない。
-- 子 skill から親（オーケストレータ）のパスは `claude-skills/` 基準の `.claude/skills/...` で書く。
+- skill から他の skill・テンプレートのパスは `claude-skills/` 基準の `.claude/skills/...` で書く。
 
 ## 検証用アプリ（`claude-skills/04_製造/`）
 
