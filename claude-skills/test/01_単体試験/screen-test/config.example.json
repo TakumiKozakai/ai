@@ -1,0 +1,24 @@
+{
+  "baseUrl": "http://localhost:8080",
+  "allowedOrigins": ["http://localhost:8080"],
+  "database": { "name": "appdb", "host": "localhost", "user": "readonly_user" },
+  "aws": { "profile": "screen-test", "region": "ap-northeast-1", "accountId": "REPLACE_WITH_ACCOUNT_ID" },
+  "cases": [
+    {
+      "id": "No1",
+      "spec": "todo.spec.js",
+      "title": "No1 タイトル未入力時は登録されない",
+      "database": {
+        "query": "SELECT id, title, description, due_date, status, created_at FROM todos ORDER BY id",
+        "unchanged": true
+      },
+      "s3": { "bucket": "REPLACE_WITH_BUCKET", "prefix": "test/", "expectedKeys": ["test/expected.txt"] },
+      "ec2": {
+        "instanceId": "REPLACE_WITH_INSTANCE_ID",
+        "logPath": "/var/log/todo/application.log",
+        "lines": 100,
+        "contains": ["REPLACE_WITH_EXPECTED_LOG_TEXT"]
+      }
+    }
+  ]
+}
