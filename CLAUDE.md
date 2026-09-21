@@ -7,11 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Claude Code 用の skill 群（設計書からの実装・レビュー・単体試験票の作成/レビュー/実行）と、その検証用 Spring Boot Todo アプリを管理するリポジトリ。
 
 - 本体は `claude-skills/`。`codex/` と `docs/` は `.gitignore` で除外された一時置き場（Git 管理外）。
-- `claude-skills/` 配下は開発工程別ディレクトリ（`01_要件定義` … `09_受入試験`）。実体があるのは以下。
-  - `03_詳細設計/todo-app設計書.md` … 検証用アプリの設計書（設計書ベース skill の入力例）
-  - `04_製造/` … 検証用アプリ（`app/`）と PostgreSQL の Docker 定義（`docker/`）
-  - `05_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と `.mcp.json`、`試験項目票/`（成果物）、`試験結果/`（実施結果）。`claude-playwrite-unit-test/` サブディレクトリにはテンプレートと構築ガイドのみ置く
-- skill 定義は `claude-skills/.claude/skills/*/SKILL.md`、サブエージェント定義は `claude-skills/.claude/agents/*.md`。**skill を使うときは `claude-skills/` を cwd にして Claude Code を起動する**（`.claude/` がそこにあり、skill 内の相対パスもすべて `claude-skills/` 基準で解決される）。**ただし単体試験項目票の作成・レビュー・実施（`write-unit-case-*` / `review-unit-case-*` / `run-playwright-unit-test` と `unit-case-writer` / `unit-case-reviewer` エージェント）は `claude-skills/05_単体試験/` に独自の `.claude/` と `.mcp.json` を持つため、これらを使うときは `05_単体試験/` を cwd にして Claude Code を起動する**（設計書 `../03_詳細設計/` やアプリ `../04_製造/` は相対パスで参照する）。
+- `claude-skills/` 配下は `app/`・`doc/`・`test/` の3ディレクトリ（工程別の番号付きディレクトリは廃止）。実体があるのは以下。`test/02_結合試験/`・`test/03_総合試験/` は `.gitkeep` のみの空ディレクトリ。
+  - `doc/詳細設計/` … 検証用アプリの設計書（設計書ベース skill の入力例）
+  - `app/` … 検証用アプリと、PostgreSQL の Docker 定義（`app/docker/`）
+  - `test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と `.mcp.json`、`試験項目票/`（成果物）、`試験結果/`（実施結果）。`claude-playwrite-unit-test/` サブディレクトリにはテンプレートと構築ガイドのみ置く
+- skill 定義は `claude-skills/.claude/skills/*/SKILL.md`、サブエージェント定義は `claude-skills/.claude/agents/*.md`。**skill を使うときは `claude-skills/` を cwd にして Claude Code を起動する**（`.claude/` がそこにあり、skill 内の相対パスもすべて `claude-skills/` 基準で解決される）。**ただし単体試験項目票の作成・レビュー・実施（`write-unit-case-*` / `review-unit-case-*` / `run-playwright-unit-test` と `unit-case-writer` / `unit-case-reviewer` エージェント）は `claude-skills/test/01_単体試験/` に独自の `.claude/` と `.mcp.json` を持つため、これらを使うときは `test/01_単体試験/` を cwd にして Claude Code を起動する**（設計書 `../../doc/詳細設計/` やアプリ `../../app/` は相対パスで参照する）。
 - `claude-playwrite` の "playwrite" は意図的な表記揺れ。パス名として skill から参照されているため修正しない。
 - skill 一覧と工程・分類の対応表の正本は `claude-skills/@Skills要件.md`。skill を追加・改名したらこの表も更新する。
 
@@ -33,8 +33,8 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
                                         ▼ 指摘が無くなるまで最大3回 → 完了報告
 ```
 
-- **`unit-case-writer`**（`05_単体試験/.claude/agents/unit-case-writer.md`、Sonnet）: 4分類の `write-unit-case-*` を Skill ツールで順に実行して4ファイルを作り、`unit-case-reviewer` を Agent ツールで起動してレビューさせ、返った指摘を `write-unit-case-*` の指摘反映モードで反映する。これを4ファイルとも指摘が無くなるまで最大3回繰り返す。3回目で残った指摘は反映せず報告し、そのときだけ `試験項目票レビュー結果_{画面名称}_完成_{yyyyMMddHHmm}.html` を作る。「他分類への移動が必要な行」は Writer が移動先へ「抜け（新規）」で追加させ、移動元へ「削除」を指示して自分で動かす。
-- **`unit-case-reviewer`**（`05_単体試験/.claude/agents/unit-case-reviewer.md`、Opus、`disallowedTools: Edit, NotebookEdit, Agent`）: 同じ実行の中では **1起動** で、Writer が `SendMessage` で再開して続けてレビューさせる（同じ人がずっとレビューするイメージ）。再開時は記憶ではなくファイルを再読してレビューする。ユーザーが「試験項目票_◯◯_01_正常系.md を設計書でレビューして」と単体レビューを頼むときも、この Reviewer を直接呼ぶ。
+- **`unit-case-writer`**（`test/01_単体試験/.claude/agents/unit-case-writer.md`、Sonnet）: 4分類の `write-unit-case-*` を Skill ツールで順に実行して4ファイルを作り、`unit-case-reviewer` を Agent ツールで起動してレビューさせ、返った指摘を `write-unit-case-*` の指摘反映モードで反映する。これを4ファイルとも指摘が無くなるまで最大3回繰り返す。3回目で残った指摘は反映せず報告し、そのときだけ `試験項目票レビュー結果_{画面名称}_完成_{yyyyMMddHHmm}.html` を作る。「他分類への移動が必要な行」は Writer が移動先へ「抜け（新規）」で追加させ、移動元へ「削除」を指示して自分で動かす。
+- **`unit-case-reviewer`**（`test/01_単体試験/.claude/agents/unit-case-reviewer.md`、Opus、`disallowedTools: Edit, NotebookEdit, Agent`）: 同じ実行の中では **1起動** で、Writer が `SendMessage` で再開して続けてレビューさせる（同じ人がずっとレビューするイメージ）。再開時は記憶ではなくファイルを再読してレビューする。ユーザーが「試験項目票_◯◯_01_正常系.md を設計書でレビューして」と単体レビューを頼むときも、この Reviewer を直接呼ぶ。
 - **skill は手順書**: `write-unit-case-*` / `review-unit-case-*` は `context: fork` を持たず `user-invocable: false`。エージェントが Skill ツールで自分のコンテキストに読み込んで実行する。モデルは agent 定義だけで決まり、skill 側には書かない。単体の「作成だけ」は無い。
 - **ユーザー確認の往復**: `AskUserQuestion` はサブエージェントでは使えないため、Writer・Reviewer はユーザーに質問しない。判断が必要な事項（要確認事項・上書き可否・失敗時の対応）は Writer が `【要判断】` として結果に返して止まる。メインセッションはそれをユーザーに確認し、回答を「確認済み回答」（判断できない事項は「保留」、中止は「中止」）として Writer の agent ID 宛に `SendMessage` で送る。Writer は同じ位置から再開する。再開できない場合は確認済み回答を添えて Writer を新規起動すれば、既存ファイルを使ってサイクルを最初からやり直す。
 - **入れ子の前提**: メイン → Writer → Reviewer で2階層のサブエージェント入れ子を使う。Claude Code 既定（3階層）で動く。`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` を 1 にすると Writer が Reviewer を起動できない。
@@ -42,15 +42,15 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 
 ### 成果物
 
-`write-unit-case-*` は試験分類別に4ファイル `試験項目票_{画面名称}_01_正常系.md` / `_02_異常系.md` / `_03_フロントバリデーション.md` / `_04_サーババリデーション.md` を出力する（出力先は既定で `05_単体試験/試験項目票/`）。分類と skill の対応は `01_正常系` = `normal-case`、`02_異常系` = `server-error`、`03_フロントバリデーション` = `front-validation`、`04_サーババリデーション` = `server-validation`。
+`write-unit-case-*` は試験分類別に4ファイル `試験項目票_{画面名称}_01_正常系.md` / `_02_異常系.md` / `_03_フロントバリデーション.md` / `_04_サーババリデーション.md` を出力する（出力先は既定で `test/01_単体試験/試験項目票/`）。分類と skill の対応は `01_正常系` = `normal-case`、`02_異常系` = `server-error`、`03_フロントバリデーション` = `front-validation`、`04_サーババリデーション` = `server-validation`。
 
 - **指摘反映モード**: `write-unit-case-*` は「指摘一覧」を渡されると、新規作成ではなく既存の自分の分類の試験項目票へ指摘を反映する。対象行は No. とシナリオで特定し、曖昧なら要確認事項に回す。他分類に属する行は削除せず行の全内容を添えて報告し、移動は Writer が行う。種別「削除」は Writer からの移動指示専用。
 - **集約実行**: Writer から「集約実行」と明示して呼ばれた場合、`review-unit-case-*` は HTML を作らず、指摘一覧・実行状態・要確認事項を返す。明示が無い（ユーザーが Reviewer を直接呼んだ）単体実行では、指摘が1件以上あるときだけ `試験項目票レビュー結果_{画面名称}_{分類}_設計書_{yyyyMMddHHmm}.html` を作る（0件ならチャット報告のみ）。
 
 ### 共通テンプレート
 
-- 試験項目票の雛形: `05_単体試験/claude-playwrite-unit-test/templates/試験項目票_{画面名称}.md`（No. 採番規則・列の記述方針もここに集約）。`write-unit-case-*` が通常モードの手順3で Read する（cwd は `05_単体試験/` なので skill 内では `claude-playwrite-unit-test/templates/...` と相対パスで参照する）
-- 試験結果票のスタイル: `05_単体試験/claude-playwrite-unit-test/templates/試験結果票_{画面名称}_{yyyyMMddHHmm}.html`。レビュー結果 HTML も同様のスタイルとする
+- 試験項目票の雛形: `test/01_単体試験/claude-playwrite-unit-test/templates/試験項目票_{画面名称}.md`（No. 採番規則・列の記述方針もここに集約）。`write-unit-case-*` が通常モードの手順3で Read する（cwd は `test/01_単体試験/` なので skill 内では `claude-playwrite-unit-test/templates/...` と相対パスで参照する）
+- 試験結果票のスタイル: `test/01_単体試験/claude-playwrite-unit-test/templates/試験結果票_{画面名称}_{yyyyMMddHHmm}.html`。レビュー結果 HTML も同様のスタイルとする
 
 ### skill を新規作成・改修するときの書き方
 
@@ -63,30 +63,30 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 - 実装・レビュー系 skill は「実装先プロジェクトは設計書の場所と一致しない」前提でユーザーに確認する。差分系（`-diff`、`review-implementation`）は比較基準のコミット ID を自動提案しない。
 - skill から他の skill・テンプレートのパスは `claude-skills/` 基準の `.claude/skills/...` で書く。
 
-## 検証用アプリ（`claude-skills/04_製造/`）
+## 検証用アプリ（`claude-skills/app/`）
 
 - スタック: Spring Boot 3.3.4 / Java 17 / Maven / Thymeleaf / Spring Data JPA / PostgreSQL 17（Docker）。
 - Service 層なしの Controller → Repository → Entity 構成。`spring.jpa.hibernate.ddl-auto=update` でスキーマを自動生成し、マイグレーションツールは使わない。
 - 事前準備: `docker/.env` と `app/.env` をそれぞれ `.env.example` からコピーして値を埋める（`.env` は Git 管理外）。
 
 ```bash
-# DB 起動（claude-skills/04_製造/docker で）
+# DB 起動（claude-skills/app/docker で）
 docker compose up -d
 
-# アプリ起動／停止（claude-skills/04_製造/app で）
+# アプリ起動／停止（claude-skills/app で）
 ./app-run.sh    # .env を読み込んで mvn spring-boot:run
 ./app-stop.sh   # SERVER_PORT（既定 8080）で待ち受けるプロセスを停止
 
-# テスト・ビルド（claude-skills/04_製造/app で）
+# テスト・ビルド（claude-skills/app で）
 mvn test
 mvn test -Dtest=TodoApplicationTests   # 単一テストクラス
 mvn -q clean package -DskipTests
 ```
 
-## Playwright 単体試験（`claude-skills/05_単体試験/`）
+## Playwright 単体試験（`claude-skills/test/01_単体試験/`）
 
-- `05_単体試験/.mcp.json` に Playwright MCP（`npx -y @playwright/mcp@0.0.80 --output-dir ./試験結果`）が定義済み。**この skill を使うときは `05_単体試験/` を cwd にして Claude Code を起動する**（`claude-skills/` 直下では `.mcp.json` が読み込まれない）。バージョンは `@latest` ではなく固定している。`run-playwright-unit-test` は `browser_take_screenshot` の `filename` 明示時の解決先（`--output-dir` ではなくセッションの cwd を基準にし、親ディレクトリも自動作成しない）という、ドキュメント化されていない実装依存の挙動に依存しているため、無断でバージョンを上げない（上げる場合は同じ挙動が保たれるか実際に確認してから `05_単体試験/.mcp.json` と本節を更新する）。
-- DB 検証には Postgres MCP（`crystaldba/postgres-mcp`）を別途登録する。接続文字列は環境変数 `DATABASE_URI` で渡し、読み取り専用モードにする（ユーザー作成は `../04_製造/docker/setup-readonly-user.sh`）。
+- `test/01_単体試験/.mcp.json` に Playwright MCP（`npx -y @playwright/mcp@0.0.80 --output-dir ./試験結果`）が定義済み。**この skill を使うときは `test/01_単体試験/` を cwd にして Claude Code を起動する**（`claude-skills/` 直下では `.mcp.json` が読み込まれない）。バージョンは `@latest` ではなく固定している。`run-playwright-unit-test` は `browser_take_screenshot` の `filename` 明示時の解決先（`--output-dir` ではなくセッションの cwd を基準にし、親ディレクトリも自動作成しない）という、ドキュメント化されていない実装依存の挙動に依存しているため、無断でバージョンを上げない（上げる場合は同じ挙動が保たれるか実際に確認してから `test/01_単体試験/.mcp.json` と本節を更新する）。
+- DB 検証には Postgres MCP（`crystaldba/postgres-mcp`）を別途登録する。接続文字列は環境変数 `DATABASE_URI` で渡し、読み取り専用モードにする（ユーザー作成は `../../app/docker/setup-readonly-user.sh`）。
 
 ```bash
 claude mcp add postgres --env DATABASE_URI="$DATABASE_URI" \
@@ -97,5 +97,5 @@ claude mcp add postgres --env DATABASE_URI="$DATABASE_URI" \
 
 - `run-playwright-unit-test` は試験項目票を **1ファイルだけ** 引数に取り、その1ファイル分だけを実施する（複数分類をまとめて実行する機能は無い。分類ごとに呼び直す）。**`_02_異常系` の票は実行しない**（DB接続断等の外部リソース異常を安全に再現できないため、対象外として報告のみ）。
 - 実行前にアプリ（8080）と DB が起動していること。
-- 入力は既定で `05_単体試験/試験項目票/`（`write-unit-case-*` の出力先）にある `試験項目票_{画面名称}_{分類}.md`。
-- 成果物は `05_単体試験/試験結果/` 配下: `試験結果票_{画面名称}_{分類}_{yyyyMMddHHmm}.html` と `{画面名称}/{分類}/` 内のキャプチャ（`No{No.}_実施キャプチャ_手順{n}_{OK/NG}.jpeg`）・DB 確認結果 md。試験結果・キャプチャは Git 管理する（`.gitignore` 対象外）。
+- 入力は既定で `test/01_単体試験/試験項目票/`（`write-unit-case-*` の出力先）にある `試験項目票_{画面名称}_{分類}.md`。
+- 成果物は `test/01_単体試験/試験結果/` 配下: `試験結果票_{画面名称}_{分類}_{yyyyMMddHHmm}.html` と `{画面名称}/{分類}/` 内のキャプチャ（`No{No.}_実施キャプチャ_手順{n}_{OK/NG}.jpeg`）・DB 確認結果 md。試験結果・キャプチャは Git 管理する（`.gitignore` 対象外）。
