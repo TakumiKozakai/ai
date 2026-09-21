@@ -1,0 +1,7 @@
+config.local.json
+runs/
+playwright-report/
+test-results/
+__pycache__/
+.runtime/
+.npm-cache/

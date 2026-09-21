@@ -1,0 +1,14 @@
+{
+  "name": "screen-evidence-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "python3 runner.py --config config.local.json",
+    "test:unit": "python3 -m unittest discover -s tests -v",
+    "test:smoke": "playwright test --config playwright.smoke.config.js",
+    "test:list": "playwright test --list",
+    "install:browser": "playwright install chromium"
+  },
+  "engines": { "node": ">=22" },
+  "devDependencies": { "@playwright/test": "1.55.1" }
+}

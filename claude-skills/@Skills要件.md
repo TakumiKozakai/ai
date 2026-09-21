@@ -31,11 +31,12 @@
 | | | 異常系 | review-unit-case-server-error | 同上。`_02_異常系.md` をRvする |
 | | | 入力チェック（フロント） | review-unit-case-front-validation | 同上。`_03_フロントバリデーション.md` をRvする |
 | | | 入力チェック（サーバ） | review-unit-case-server-validation | 同上。`_04_サーババリデーション.md` をRvする |
+| 単体試験コード作成 | 画面 | 正常系・入力チェック | write-playwright-unit-test | 試験項目票からPlaywrightコード・DB/AWS確認設定・No.対応表を作成する。実施・外部接続は行わない |
 | 単体試験実施 | | | run-playwright-unit-test | 試験項目票（1ファイル）をもとに試験実施する。`_02_異常系` は対象外 |
 
 ## 使い方
 
-単体試験関連（`unit-case-writer` / `unit-case-reviewer` / `write-unit-case-*` / `review-unit-case-*` / `run-playwright-unit-test`）は `claude-skills/test/01_単体試験/` に `.claude/` と `.mcp.json` を持つため、**`test/01_単体試験/` を cwd にして Claude Code を起動する**（`implement-from-design-doc` 等それ以外の skill は従来どおり `claude-skills/` が cwd）。
+単体試験関連（`unit-case-writer` / `unit-case-reviewer` / `write-unit-case-*` / `review-unit-case-*` / `write-playwright-unit-test` / `run-playwright-unit-test`）は `claude-skills/test/01_単体試験/` に `.claude/` と `.mcp.json` を持つため、**`test/01_単体試験/` を cwd にして Claude Code を起動する**（`implement-from-design-doc` 等それ以外の skill は従来どおり `claude-skills/` が cwd）。
 
 ### unit-case-writer（エージェント）
 
@@ -187,22 +188,38 @@
 - フロント・サーバ双方で同じ検証を起票した重複は分類誤りとしない。画面のサーバ処理検証のための直接リクエストはAPI用試験項目票の対象として除外しない
 - 単体実行時のHTML名は `試験項目票レビュー結果_{画面名称}_04_サーババリデーション_設計書_{yyyyMMddHHmm}.html`
 
+### write-playwright-unit-test
+
+#### 使い方
+
+- `test/01_単体試験/` をcwdにし、試験項目票1ファイルを渡す。
+- 例: `write-playwright-unit-test で 01_試験項目/試験項目票_Todo一覧画面_04_サーババリデーション.md からテストコードを作って。アプリソースは ../../app、suite-idは todo-server-validation`
+- 入力: 試験項目票（必須）、アプリソース・設計書・設定例・suite-id・対象No.・確認済み回答（任意）。
+
+#### 詳細
+
+- 票を根拠に固定Playwrightコード、DB前後・S3・EC2確認設定例、元票SHA-256とNo.対応表を作る。
+- 出力: `screen-test/specs/<suite-id>.spec.js`、`screen-test/plans/<suite-id>/config.example.json` と `mapping.md`。
+- 期待値・SQL・接続・認証の不明点は保留として質問する。未指定を対象外にせず、常に成功するコードやskipで埋めない。
+- ローカルの構文・列挙・設定検証まで。試験実施、クライアント導入、実環境への接続は行わない。
+- 既存コードを修正する場合もこのスキルを使用する。試験項目票自体は変更しない。
+
 ### run-playwright-unit-test
 
 #### 使い方
 
-- `test/01_単体試験/` を cwd にしたセッションで、試験項目票ファイルを **1つだけ** 指定して依頼する（複数分類の一括実施は無い。分類ごとに呼び直す）
-  - 例: `run-playwright-unit-test 試験項目票/試験項目票_Todo一覧画面_01_正常系.md`
-- 入力: 試験項目票ファイルパス（1つ、必須）
-- 実行前提: 対象アプリ（既定 8080）が起動していること。DB検証がある場合は Postgres MCP（読み取り専用ユーザー）が接続済みであること
+- 同じcwdで、試験項目票・対応表・実行設定を指定する。
+- 例: `run-playwright-unit-test で 01_試験項目/試験項目票_Todo一覧画面_04_サーババリデーション.md を実施して。対応表は screen-test/plans/todo-server-validation/mapping.md、設定は同フォルダのconfig.local.json`
+- 票のみ指定された場合はplansの元票から一意に照合する。未生成・複数候補なら実行せず確認する。
+- 詳細は `test/01_単体試験/screen-test/試験準備・実施手順.md`。
 
 #### 詳細
 
-- ファイル名の `_01_正常系` / `_03_フロントバリデーション` / `_04_サーババリデーション` から分類を判定する。**`_02_異常系` の票は実行しない**（DB接続断等の外部リソース異常を安全に再現できないため、対象外として理由を報告するだけで終了する）
-- Playwright MCP でNoごとに操作手順を1ステップずつ実行し、`browser_take_screenshot` で撮影後、期待結果と突合してOK/NGを判定する。DB確認用クエリがある行は Postgres MCP の `execute_sql` で検証する（クエリに無いSQLを推測実行しない）
-- 開発者ツール操作・curl直叩き等 Playwright の通常操作で再現できない回避手順（サーババリデーションの一部）は、実施できる範囲だけ行い、できない項目は「未実施（理由）」として記録する（NGにはしない）
-- 成果物は `test/01_単体試験/試験結果/` 配下: `試験結果票_{画面名称}_{分類}_{yyyyMMddHHmm}.html`、`{画面名称}/{分類}/No{No.}_実施キャプチャ_手順{n}_{OK/NG}.jpeg`、DB確認結果 md。試験結果・キャプチャは Git 管理する
-- 試験項目票・設計書・アプリのソースコードは変更しない
+- 元票ハッシュ、No.・操作・期待値、spec・cases・対応表を照合してから、対象設定を指定してrunnerを実行する。
+- 画面・撮影はPlaywright CLI、前後DBはpsql、S3・SSM経由EC2ログはAWS CLI。
+- `_02_異常系` の障害注入は対象外。準備不足や未対応項目を別試験で代用しない。
+- 成果物は `screen-test/runs/<run-id>/`。No.単位で合否・未実施を集約し、確認対象外を成功扱いしない。
+- テストコードの生成・修正、依存導入・疎通確認は行わない。修正は作成スキルへ戻す。
 
 ### Skill名
 

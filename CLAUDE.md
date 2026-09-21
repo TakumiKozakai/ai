@@ -10,8 +10,8 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 - `claude-skills/` 配下は `app/`・`doc/`・`test/` の3ディレクトリ（工程別の番号付きディレクトリは廃止）。実体があるのは以下。`test/02_結合試験/`・`test/03_総合試験/` は `.gitkeep` のみの空ディレクトリ。
   - `doc/詳細設計/` … 検証用アプリの設計書（設計書ベース skill の入力例）
   - `app/` … 検証用アプリと、PostgreSQL の Docker 定義（`app/docker/`）
-  - `test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と `.mcp.json`、`試験項目票/`（成果物）、`試験結果/`（実施結果）。`claude-playwrite-unit-test/` サブディレクトリにはテンプレートと構築ガイドのみ置く
-- skill 定義は `claude-skills/.claude/skills/*/SKILL.md`、サブエージェント定義は `claude-skills/.claude/agents/*.md`。**skill を使うときは `claude-skills/` を cwd にして Claude Code を起動する**（`.claude/` がそこにあり、skill 内の相対パスもすべて `claude-skills/` 基準で解決される）。**ただし単体試験項目票の作成・レビュー・実施（`write-unit-case-*` / `review-unit-case-*` / `run-playwright-unit-test` と `unit-case-writer` / `unit-case-reviewer` エージェント）は `claude-skills/test/01_単体試験/` に独自の `.claude/` と `.mcp.json` を持つため、これらを使うときは `test/01_単体試験/` を cwd にして Claude Code を起動する**（設計書 `../../doc/詳細設計/` やアプリ `../../app/` は相対パスで参照する）。
+  - `test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と CLI実行環境 `screen-test/`、`試験項目票/`（成果物）、`試験結果/`（実施結果）。`claude-playwrite-unit-test/` サブディレクトリにはテンプレートと構築ガイドのみ置く
+- skill 定義は `claude-skills/.claude/skills/*/SKILL.md`、サブエージェント定義は `claude-skills/.claude/agents/*.md`。**skill を使うときは `claude-skills/` を cwd にして Claude Code を起動する**（`.claude/` がそこにあり、skill 内の相対パスもすべて `claude-skills/` 基準で解決される）。**ただし単体試験項目票の作成・レビュー・実施（`write-unit-case-*` / `review-unit-case-*` / `write-playwright-unit-test` / `run-playwright-unit-test` と `unit-case-writer` / `unit-case-reviewer` エージェント）は `claude-skills/test/01_単体試験/` に独自の `.claude/` と `.mcp.json` を持つため、これらを使うときは `test/01_単体試験/` を cwd にして Claude Code を起動する**（設計書 `../../doc/詳細設計/` やアプリ `../../app/` は相対パスで参照する）。
 - `claude-playwrite` の "playwrite" は意図的な表記揺れ。パス名として skill から参照されているため修正しない。
 - skill 一覧と工程・分類の対応表の正本は `claude-skills/@Skills要件.md`。skill を追加・改名したらこの表も更新する。
 
@@ -83,19 +83,15 @@ mvn test -Dtest=TodoApplicationTests   # 単一テストクラス
 mvn -q clean package -DskipTests
 ```
 
-## Playwright 単体試験（`claude-skills/test/01_単体試験/`）
+## Playwright CLI 画面試験（`claude-skills/test/01_単体試験/screen-test/`）
 
-- `test/01_単体試験/.mcp.json` に Playwright MCP（`npx -y @playwright/mcp@0.0.80 --output-dir ./試験結果`）が定義済み。**この skill を使うときは `test/01_単体試験/` を cwd にして Claude Code を起動する**（`claude-skills/` 直下では `.mcp.json` が読み込まれない）。バージョンは `@latest` ではなく固定している。`run-playwright-unit-test` は `browser_take_screenshot` の `filename` 明示時の解決先（`--output-dir` ではなくセッションの cwd を基準にし、親ディレクトリも自動作成しない）という、ドキュメント化されていない実装依存の挙動に依存しているため、無断でバージョンを上げない（上げる場合は同じ挙動が保たれるか実際に確認してから `test/01_単体試験/.mcp.json` と本節を更新する）。
-- DB 検証には Postgres MCP（`crystaldba/postgres-mcp`）を別途登録する。接続文字列は環境変数 `DATABASE_URI` で渡し、読み取り専用モードにする（ユーザー作成は `../../app/docker/setup-readonly-user.sh`）。
-
-```bash
-claude mcp add postgres --env DATABASE_URI="$DATABASE_URI" \
-  -- uvx --with "mcp<2" postgres-mcp --access-mode=restricted
-```
-
-（`--with "mcp<2"` は postgres-mcp が mcp 2.x に未対応なための固定。対応後は不要になる可能性がある）
-
-- `run-playwright-unit-test` は試験項目票を **1ファイルだけ** 引数に取り、その1ファイル分だけを実施する（複数分類をまとめて実行する機能は無い。分類ごとに呼び直す）。**`_02_異常系` の票は実行しない**（DB接続断等の外部リソース異常を安全に再現できないため、対象外として報告のみ）。
-- 実行前にアプリ（8080）と DB が起動していること。
-- 入力は既定で `test/01_単体試験/試験項目票/`（`write-unit-case-*` の出力先）にある `試験項目票_{画面名称}_{分類}.md`。
-- 成果物は `test/01_単体試験/試験結果/` 配下: `試験結果票_{画面名称}_{分類}_{yyyyMMddHHmm}.html` と `{画面名称}/{分類}/` 内のキャプチャ（`No{No.}_実施キャプチャ_手順{n}_{OK/NG}.jpeg`）・DB 確認結果 md。試験結果・キャプチャは Git 管理する（`.gitignore` 対象外）。
+- 環境構築は `screen-test/構築手順書.md`、スキルによるコード作成から実施までは `screen-test/試験準備・実施手順.md`、生成物の契約は `screen-test/テストコード作成規約.md`。
+- `write-playwright-unit-test` は試験票1ファイルから `specs/<suite-id>.spec.js` と `plans/<suite-id>/config.example.json`・`mapping.md` を作成する。元票のSHA-256、No.との対応、未確定事項を記録し、外部接続・試験実施は行わない。
+- `bash with-runtime.sh python3 runner.py --config plans/<suite-id>/config.local.json` で票ごとの設定を指定する。ルート設定用の `npm test` もPython runnerを起動し、No.ごとにDB事前確認→Playwright Test CLI→DB事後確認→S3一覧→EC2内ログを実施する。
+- DBはpsqlの読み取り専用接続。EC2内ログはAWS CLI / SSMで固定tailコマンドを実行する。S3・EC2の接続先と期待値は `config.local.json` で設定する。
+- Playwright MCP・Postgres MCPは通常の試験実行に使用しない。`.mcp.json` に自動起動するサーバーは登録しない。
+- `run-playwright-unit-test` は試験項目票1ファイル・対応表・レビュー済みspec/configの一致を確認して、その設定を指定しCLIを実行する。コード作成や期待値の修正は行わない。`_02_異常系` の障害注入は対象外。
+- 各操作は `specs/evidence.js` のstepを使用して撮影する。画面が失敗してもDB事後・AWSの収集を試み、未実施や取得エラーを成功扱いしない。
+- 成果物は `screen-test/runs/<UTC日時>-<ID>/` に実行単位で保存し、Git管理外。従来のMCP証跡は既存ファイルとして保持する。
+- サンプルはTodoの必須入力検証1件。ローカルTodoにAWS連携はないため、ローカル設定ではS3・EC2は理由付き対象外。AWSを確認したとは扱わない。
+- DB復元・S3削除などの初期化は自動実行しない。更新系試験は別途初期状態を準備する。
