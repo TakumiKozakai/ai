@@ -4,13 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## リポジトリの目的と構成
 
-Claude Code 用の skill 群（設計書からの実装・レビュー・単体試験票の作成/レビュー/実行）と、その検証用 Spring Boot Todo アプリを管理するリポジトリ。
+Claude Code 用の skill 群（設計書からの実装・レビュー・単体試験票の作成/レビュー/実行）と、その検証用 ECサイトアプリ（React + Go）を管理するリポジトリ。
 
-- 本体は `claude-skills/`。`codex/` と `docs/` は `.gitignore` で除外された一時置き場（Git 管理外）。
+- 本体は `claude-skills/`。ルートの `docs/`（と、作られた場合の `codex/`）はコミットしない一時置き場。`.gitignore` には入れていないため `git status` に未追跡として表示されるが、`git add` の対象に含めない。
 - `claude-skills/` 配下は `app/`・`doc/`・`test/` の3ディレクトリ（工程別の番号付きディレクトリは廃止）。実体があるのは以下。`test/02_結合試験/`・`test/03_総合試験/` は `.gitkeep` のみの空ディレクトリ。
   - `doc/詳細設計/` … 検証用アプリの設計書（設計書ベース skill の入力例）
+  - `doc/templates/` … 画面設計書のテンプレート `画面設計書_{画面名称}.md`（画面項目定義／入力チェック内容／画面処理の3章構成と記述方針）
   - `app/` … 検証用アプリと、PostgreSQL の Docker 定義（`app/docker/`）
-  - `test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と CLI実行環境 `screen-test/`、`試験項目票/`（成果物）、`試験結果/`（実施結果）。`claude-playwrite-unit-test/` サブディレクトリにはテンプレートと構築ガイドのみ置く
+  - `test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と CLI実行環境 `screen-test/`、`01_試験項目/`（成果物）、`02_試験結果/`（実施結果）。`claude-playwrite-unit-test/` サブディレクトリにはテンプレートと構築ガイドのみ置く
 - skill 定義は `claude-skills/.claude/skills/*/SKILL.md`、サブエージェント定義は `claude-skills/.claude/agents/*.md`。**skill を使うときは `claude-skills/` を cwd にして Claude Code を起動する**（`.claude/` がそこにあり、skill 内の相対パスもすべて `claude-skills/` 基準で解決される）。**ただし単体試験項目票の作成・レビュー・実施（`write-unit-case-*` / `review-unit-case-*` / `write-playwright-unit-test` / `run-playwright-unit-test` と `unit-case-writer` / `unit-case-reviewer` エージェント）は `claude-skills/test/01_単体試験/` に独自の `.claude/` と `.mcp.json` を持つため、これらを使うときは `test/01_単体試験/` を cwd にして Claude Code を起動する**（設計書 `../../doc/詳細設計/` やアプリ `../../app/` は相対パスで参照する）。
 - `claude-playwrite` の "playwrite" は意図的な表記揺れ。パス名として skill から参照されているため修正しない。
 - skill 一覧と工程・分類の対応表の正本は `claude-skills/@Skills要件.md`。skill を追加・改名したらこの表も更新する。
@@ -42,7 +43,7 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 
 ### 成果物
 
-`write-unit-case-*` は試験分類別に4ファイル `試験項目票_{画面名称}_01_正常系.md` / `_02_異常系.md` / `_03_フロントバリデーション.md` / `_04_サーババリデーション.md` を出力する（出力先は既定で `test/01_単体試験/試験項目票/`）。分類と skill の対応は `01_正常系` = `normal-case`、`02_異常系` = `server-error`、`03_フロントバリデーション` = `front-validation`、`04_サーババリデーション` = `server-validation`。
+`write-unit-case-*` は試験分類別に4ファイル `試験項目票_{画面名称}_01_正常系.md` / `_02_異常系.md` / `_03_フロントバリデーション.md` / `_04_サーババリデーション.md` を出力する（出力先は既定で `test/01_単体試験/01_試験項目/`）。分類と skill の対応は `01_正常系` = `normal-case`、`02_異常系` = `server-error`、`03_フロントバリデーション` = `front-validation`、`04_サーババリデーション` = `server-validation`。
 
 - **指摘反映モード**: `write-unit-case-*` は「指摘一覧」を渡されると、新規作成ではなく既存の自分の分類の試験項目票へ指摘を反映する。対象行は No. とシナリオで特定し、曖昧なら要確認事項に回す。他分類に属する行は削除せず行の全内容を添えて報告し、移動は Writer が行う。種別「削除」は Writer からの移動指示専用。
 - **集約実行**: Writer から「集約実行」と明示して呼ばれた場合、`review-unit-case-*` は HTML を作らず、指摘一覧・実行状態・要確認事項を返す。明示が無い（ユーザーが Reviewer を直接呼んだ）単体実行では、指摘が1件以上あるときだけ `試験項目票レビュー結果_{画面名称}_{分類}_設計書_{yyyyMMddHHmm}.html` を作る（0件ならチャット報告のみ）。
@@ -65,22 +66,28 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 
 ## 検証用アプリ（`claude-skills/app/`）
 
-- スタック: Spring Boot 3.3.4 / Java 17 / Maven / Thymeleaf / Spring Data JPA / PostgreSQL 17（Docker）。
-- Service 層なしの Controller → Repository → Entity 構成。`spring.jpa.hibernate.ddl-auto=update` でスキーマを自動生成し、マイグレーションツールは使わない。
-- 事前準備: `docker/.env` と `app/.env` をそれぞれ `.env.example` からコピーして値を埋める（`.env` は Git 管理外）。
+- ECサイト（商品一覧・検索・カート・購入・会員登録）。設計書は `doc/詳細設計/ecsite-*.md`（API は `ecsite-API設計書.md`、構成・認証は `ecsite-画面一覧・共通仕様書.md`）。旧 Todo アプリの設計書 `todo-app*.md` も残っている。
+- フロントエンド `frontend/`: React 19 / TypeScript / Vite / React Router の SPA。API 呼び出しは `src/api/client.ts` に集約し、全リクエストに `X-Requested-With: XMLHttpRequest` を付ける。
+- バックエンド `backend/`: Go / Gin / GORM / PostgreSQL 17（Docker）。`handler`（入力チェック）→ `service`（業務ロジック・トランザクション）→ `repository` → `model` 構成。認証は JWT を HttpOnly Cookie `ecsite_token` に入れる。
+- スキーマと初期データは `docker/postgresql/initdb/`（`01_init.sql`・`03_seed.sql`）で作成し、GORM の `AutoMigrate` は使わない。initdb はボリュームが空の初回起動時のみ実行されるため、変更したら `docker/DB再作成手順.md` に従って作り直す。
+- 事前準備: `docker/.env` と `app/.env` をそれぞれ `.env.example` からコピーして値を埋める（`.env` は Git 管理外。`JWT_SECRET` は32文字以上）。Node.js 20.19 以上が必要（Homebrew の Node が壊れている環境では `test/01_単体試験/screen-test/.runtime/` の Node 22 を PATH に足す）。
 
 ```bash
 # DB 起動（claude-skills/app/docker で）
 docker compose up -d
 
 # アプリ起動／停止（claude-skills/app で）
-./app-run.sh    # .env を読み込んで mvn spring-boot:run
+./app-run.sh    # .env を読み込み、frontend をビルドして backend から配信（http://localhost:8080）
 ./app-stop.sh   # SERVER_PORT（既定 8080）で待ち受けるプロセスを停止
 
-# テスト・ビルド（claude-skills/app で）
-mvn test
-mvn test -Dtest=TodoApplicationTests   # 単一テストクラス
-mvn -q clean package -DskipTests
+# 開発時は別々に起動（frontend は http://localhost:5173、/api は 8080 へ proxy）
+(cd backend && go run ./cmd/server)   # .env の値を環境変数に読み込んでおく
+(cd frontend && npm run dev)
+
+# テスト・ビルド
+(cd backend && go vet ./... && go test ./...)
+(cd backend && go test ./internal/handler -run TestValidateSignup)   # 単一テスト
+(cd frontend && npm run build)        # tsc による型チェック + vite build
 ```
 
 ## Playwright CLI 画面試験（`claude-skills/test/01_単体試験/screen-test/`）
@@ -93,5 +100,14 @@ mvn -q clean package -DskipTests
 - `run-playwright-unit-test` は試験項目票1ファイル・対応表・レビュー済みspec/configの一致を確認して、その設定を指定しCLIを実行する。コード作成や期待値の修正は行わない。`_02_異常系` の障害注入は対象外。
 - 各操作は `specs/evidence.js` のstepを使用して撮影する。画面が失敗してもDB事後・AWSの収集を試み、未実施や取得エラーを成功扱いしない。
 - 成果物は `screen-test/runs/<UTC日時>-<ID>/` に実行単位で保存し、Git管理外。従来のMCP証跡は既存ファイルとして保持する。
-- サンプルはTodoの必須入力検証1件。ローカルTodoにAWS連携はないため、ローカル設定ではS3・EC2は理由付き対象外。AWSを確認したとは扱わない。
+- サンプルはTodoの必須入力検証1件（`specs/todo.spec.js`・`plans/todo/`・`config.todo-local.json`）。検証用アプリをECサイトに置き換えたため、このサンプルは現状のアプリでは動かない。ローカルTodoにAWS連携はないため、ローカル設定ではS3・EC2は理由付き対象外。AWSを確認したとは扱わない。
 - DB復元・S3削除などの初期化は自動実行しない。更新系試験は別途初期状態を準備する。
+
+```bash
+# screen-test で実行。with-runtime.sh は .runtime/ の Node 22 とブラウザを PATH に通して引数のコマンドを実行する
+bash with-runtime.sh npm run test:unit    # runner.py の単体テスト（python3 -m unittest discover -s tests）
+bash with-runtime.sh python3 -m unittest discover -s tests -k <テスト名の一部>   # 単一テスト（例: -k test_missing_aws_configuration）
+bash with-runtime.sh npm run test:list    # spec の一覧（実行はしない）
+bash with-runtime.sh npm run test:smoke   # playwright.smoke.config.js のスモーク
+bash with-runtime.sh python3 runner.py --config plans/<suite-id>/config.local.json   # 票ごとの試験実施
+```
