@@ -119,7 +119,7 @@ COMMENT ON COLUMN products.price          IS '販売価格（税込・円）';
 COMMENT ON COLUMN products.stock_quantity IS '在庫数';
 COMMENT ON COLUMN products.image_url      IS '商品画像のURL';
 COMMENT ON COLUMN products.is_published   IS '公開フラグ（false は一覧・検索・詳細に表示しない）';
-COMMENT ON COLUMN products.version        IS '楽観ロック用バージョン（JPA @Version）';
+COMMENT ON COLUMN products.version        IS '楽観ロック用バージョン（在庫更新ごとに+1）';
 
 -- ============================================================
 -- cart_items
