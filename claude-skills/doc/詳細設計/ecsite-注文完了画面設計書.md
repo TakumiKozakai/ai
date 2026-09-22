@@ -1,6 +1,6 @@
 # ecsite 注文完了画面設計書
 
-画面名: 注文完了画面（SC-05）。対応パス: `GET /orders/{orderNumber}/complete`。テンプレート: `templates/order/complete.html`。対応コントローラ: `OrderController`（`app/src/main/java/com/example/ecsite/controller/OrderController.java`）。本書は `doc/詳細設計/ecsite-ER図・テーブル定義書.md` および `doc/詳細設計/ecsite-画面一覧・共通仕様書.md` を根拠に作成した注文完了画面単体の詳細設計書であり、実装前の新規設計である。注文確定処理については「ecsite-購入手続き画面設計書.md」を参照。
+画面名: 注文完了画面（SC-05）。URL: `/orders/:orderNumber/complete`。画面コンポーネント: `app/frontend/src/pages/OrderCompletePage.tsx`。使用API: A-14 `GET /api/orders/:orderNumber`（`app/backend/internal/handler/order_handler.go`）。本書は `doc/詳細設計/ecsite-ER図・テーブル定義書.md`、`doc/詳細設計/ecsite-画面一覧・共通仕様書.md`、`doc/詳細設計/ecsite-API設計書.md` を根拠に作成した注文完了画面単体の詳細設計書であり、実装前の新規設計である。注文確定処理については「ecsite-購入手続き画面設計書.md」を参照。
 
 ## 1. 画面項目定義
 
@@ -40,7 +40,7 @@
 | 商品合計表示 | テキスト表示 | - | `orders.subtotal_amount` | 表示のみ | - |
 | 送料表示 | テキスト表示 | - | `orders.shipping_fee` | 表示のみ | - |
 | 支払総額表示 | テキスト表示 | - | `orders.total_amount` | 表示のみ | - |
-| 買い物を続けるリンク | リンク | - | 「買い物を続ける」 | 遷移可 | `GET /products` へ遷移 |
+| 買い物を続けるリンク | リンク | - | 「買い物を続ける」 | 遷移可 | `/products` へ遷移 |
 
 ## 2. 入力チェック内容
 
@@ -56,19 +56,20 @@
 
 ### 3.1 遷移元
 
-- 通常は購入手続き画面の注文確定（`POST /checkout`）後のリダイレクトで遷移する。`GET /orders/{orderNumber}/complete` はURLを直接指定してもアクセスでき、ブラウザの再読み込みでも同じ内容が表示される（注文は再作成されない）。
-- ログインが必要。未ログインでアクセスした場合はログイン画面へリダイレクトされ、ログイン後に注文完了画面へ戻る（「ecsite-画面一覧・共通仕様書.md」の4章）。
+- 通常は購入手続き画面の注文確定（A-13 `POST /api/orders` の成功）後に遷移する。`/orders/:orderNumber/complete` はURLを直接指定しても表示でき、ブラウザの再読み込みでも同じ内容が表示される（注文は再作成されない）。
+- ログインが必要。未ログインの場合はログイン画面へ遷移し、ログイン後に注文完了画面へ戻る（「ecsite-画面一覧・共通仕様書.md」の4.4）。
 
 ### 3.2 初期表示
 
-- `GET /orders/{orderNumber}/complete` にアクセスすると、`OrderController#complete` が注文番号とログインユーザーの `user_id` で `orders` と `order_items` を取得し、注文完了画面を表示する。
+- `/orders/:orderNumber/complete` を表示すると、A-14 `GET /api/orders/:orderNumber` で注文を取得し、注文完了画面を表示する。バックエンドは注文番号とログインユーザーの `user_id` で `orders` と `order_items` を検索する。
 - 表示する値はすべて `orders`・`order_items` に保存された購入時点の値であり、`products`・`addresses` は参照しない（購入後に商品や住所が変更されても表示は変わらない）。
-- **対象注文が表示できない場合**: 注文番号に一致する注文が存在しない、または他ユーザーの注文である場合は、404エラーページを表示する（「ecsite-画面一覧・共通仕様書.md」の6章）。
+- **対象注文が表示できない場合**: 注文番号に一致する注文が存在しない、または他ユーザーの注文である場合（A-14 が `404`）は、「ページが見つかりません」画面を表示する（「ecsite-画面一覧・共通仕様書.md」の6章）。
 
 ### 3.3 商品一覧画面への遷移
 
-- 買い物を続けるリンク押下により `GET /products` へ遷移する。
+- 買い物を続けるリンク押下により `/products` へ遷移する。
 
 ### 3.4 例外発生時の共通事項
 
-- DBアクセス例外等が発生した場合は、「ecsite-画面一覧・共通仕様書.md」の6章のとおり500エラーページを表示する。
+- A-14 が `401` を返した場合は、ログイン画面へ遷移する（「ecsite-画面一覧・共通仕様書.md」の4.4）。
+- `500` を返した場合、またはバックエンドに接続できない場合は、「ecsite-画面一覧・共通仕様書.md」の6章のとおりシステムエラー画面を表示する。
