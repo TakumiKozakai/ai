@@ -11,11 +11,16 @@
   "cases": [
     {
       "id": "No1",
-      "spec": "todo.spec.js",
+      "spec": "todo.spec.ts",
       "title": "No1 タイトル未入力時は登録されない",
       "database": {
-        "query": "SELECT id, title, description, due_date, status, created_at FROM todos ORDER BY id",
+        "queries": {
+          "todos": "SELECT id, title, description, due_date, status, created_at FROM todos ORDER BY id"
+        },
         "unchanged": true
+      },
+      "appLog": {
+        "notApplicable": "ローカルTodoアプリはログファイルを出力しない"
       },
       "s3": {
         "notApplicable": "ローカルTodoアプリにはS3連携がない"

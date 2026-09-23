@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { test, expect } from '../../specs/evidence.js';
+import { test, expect } from '../../specs/evidence.ts';
 
 test('環境確認: 入力・クリック・操作ごとのPNG保存', async ({ page, step }, testInfo) => {
   await step('検証用HTMLを表示', async () => {

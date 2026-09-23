@@ -1,6 +1,6 @@
 # 試験項目票: Todo一覧画面（サンプル1件）
 
-対応spec: `specs/todo.spec.js`、設定: `config.todo-local.json`。
+対応spec: `specs/todo.spec.ts`、設定: `config.todo-local.json`。
 既存の試験項目票全体を代替するものではない。
 
 | No. | シナリオ | 正常異常 | 前提条件 | 操作手順 | 期待結果 |

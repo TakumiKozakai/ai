@@ -1,18 +1,33 @@
 {
   "baseUrl": "http://localhost:8080",
-  "allowedOrigins": ["http://localhost:8080"],
-  "database": { "name": "appdb", "host": "localhost", "user": "readonly_user" },
+  "allowedOrigins": [
+    "http://localhost:8080"
+  ],
+  "database": {
+    "name": "appdb",
+    "host": "localhost",
+    "user": "readonly_user"
+  },
   "cases": [
     {
       "id": "No1",
-      "spec": "todo.spec.js",
+      "spec": "todo.spec.ts",
       "title": "No1 タイトル未入力時は登録されない",
       "database": {
-        "query": "SELECT id, title, description, due_date, status, created_at FROM todos ORDER BY id",
+        "queries": {
+          "todos": "SELECT id, title, description, due_date, status, created_at FROM todos ORDER BY id"
+        },
         "unchanged": true
       },
-      "s3": { "notApplicable": "ローカルTodoアプリにはS3連携がない" },
-      "ec2": { "notApplicable": "ローカルTodoアプリはEC2上で稼働していない" }
+      "appLog": {
+        "notApplicable": "ローカルTodoアプリはログファイルを出力しない"
+      },
+      "s3": {
+        "notApplicable": "ローカルTodoアプリにはS3連携がない"
+      },
+      "ec2": {
+        "notApplicable": "ローカルTodoアプリはEC2上で稼働していない"
+      }
     }
   ]
 }

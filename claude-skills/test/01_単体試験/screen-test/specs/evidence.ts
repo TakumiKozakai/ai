@@ -1,7 +1,9 @@
 import { test as base, expect } from '@playwright/test';
 
+export type Step = (name: string, action: () => Promise<void>) => Promise<void>;
+
 // Every operation is captured, including operations whose assertion fails.
-export const test = base.extend({
+export const test = base.extend<{ step: Step }>({
   step: async ({ page }, use, testInfo) => {
     let index = 0;
     await use(async (name, action) => {

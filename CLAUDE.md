@@ -70,14 +70,14 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 - フロントエンド `frontend/`: React 19 / TypeScript / Vite / React Router の SPA。API 呼び出しは `src/api/client.ts` に集約し、全リクエストに `X-Requested-With: XMLHttpRequest` を付ける。
 - バックエンド `backend/`: Go / Gin / GORM / PostgreSQL 17（Docker）。`handler`（入力チェック）→ `service`（業務ロジック・トランザクション）→ `repository` → `model` 構成。認証は JWT を HttpOnly Cookie `ecsite_token` に入れる。
 - スキーマと初期データは `docker/postgresql/initdb/`（`01_init.sql`・`03_seed.sql`）で作成し、GORM の `AutoMigrate` は使わない。initdb はボリュームが空の初回起動時のみ実行されるため、変更したら `docker/DB再作成手順.md` に従って作り直す。
-- 事前準備: `docker/.env` と `app/.env` をそれぞれ `.env.example` からコピーして値を埋める（`.env` は Git 管理外。`JWT_SECRET` は32文字以上）。Node.js 20.19 以上が必要（Homebrew の Node が壊れている環境では `test/01_単体試験/screen-test/.runtime/` の Node 22 を PATH に足す）。
+- 事前準備: `docker/.env` と `app/.env` をそれぞれ `.env.example` からコピーして値を埋める（`.env` は Git 管理外。`JWT_SECRET` は32文字以上。`docker/.env` の `POSTGRES_PLAYWRIGHT_PASSWORD` は compose の必須変数）。Node.js 20.19 以上が必要（Homebrew の Node が壊れている環境では `test/01_単体試験/screen-test/.runtime/` の Node 22 を PATH に足す）。
 
 ```bash
 # DB 起動（claude-skills/app/docker で）
 docker compose up -d
 
 # アプリ起動／停止（claude-skills/app で）
-./app-run.sh    # .env を読み込み、frontend をビルドして backend から配信（http://localhost:8080）
+./app-run.sh    # .env を読み込み、frontend をビルドして backend から配信（http://localhost:8080）。サーバーログは logs/app.log にも追記
 ./app-stop.sh   # SERVER_PORT（既定 8080）で待ち受けるプロセスを停止
 
 # 開発時は別々に起動（frontend は http://localhost:5173、/api は 8080 へ proxy）
@@ -93,21 +93,26 @@ docker compose up -d
 ## Playwright CLI 画面試験（`claude-skills/test/01_単体試験/screen-test/`）
 
 - 環境構築は `screen-test/構築手順書.md`、スキルによるコード作成から実施までは `screen-test/試験準備・実施手順.md`、生成物の契約は `screen-test/テストコード作成規約.md`。
-- `write-playwright-unit-test` は試験票1ファイルから `specs/<suite-id>.spec.js` と `plans/<suite-id>/config.example.json`・`mapping.md` を作成する。元票のSHA-256、No.との対応、未確定事項を記録し、外部接続・試験実施は行わない。
-- `bash with-runtime.sh python3 runner.py --config plans/<suite-id>/config.local.json` で票ごとの設定を指定する。ルート設定用の `npm test` もPython runnerを起動し、No.ごとにDB事前確認→Playwright Test CLI→DB事後確認→S3一覧→EC2内ログを実施する。
-- DBはpsqlの読み取り専用接続。EC2内ログはAWS CLI / SSMで固定tailコマンドを実行する。S3・EC2の接続先と期待値は `config.local.json` で設定する。
+- テスト用コード（runner・spec・fixture・単体テスト）はすべて TypeScript。Node.js 22.18+ の型ストリップで `.ts` を直接実行し、ビルド工程は無い（`tsc` は型チェックのみ）。import には `.ts` 拡張子を付け、`enum` など型除去で消せない構文は使わない（`tsconfig.json` の `erasableSyntaxOnly`）。
+- `write-playwright-unit-test` は試験票1ファイルから `specs/<suite-id>.spec.ts` と `plans/<suite-id>/config.example.json`・`mapping.md`、前提データが要るNo.には `plans/<suite-id>/seed/*.sql` を作成する。元票のSHA-256、No.との対応、未確定事項を記録し、外部接続・試験実施は行わない。
+- runner は `src/runner.ts`（設定の型と検証は `src/config.ts`、外部アクセスは `db.ts`・`aws.ts`・`appLog.ts`・`browser.ts`）。`bash with-runtime.sh node src/runner.ts --config plans/<suite-id>/config.local.json` で票ごとの設定を指定する。No.ごとに seed 投入→DB事前→ログ位置記録→Playwright Test CLI→DB事後→アプリログ→S3一覧→EC2内ログを実施する。
+- DBは試験専用ユーザー `playwright_user`（DML可・DDL不可。`app/docker/postgresql/initdb/04_create_playwright_user.sh`／既存DBには `app/docker/setup-playwright-user.sh`）1つで seed とスナップショットを行う。psql は Mac 本体に導入し、ローカル（Docker）と AWS 側 DB を設定の接続先だけで切り替える。スナップショットは `database.queries` の名前付き複数SELECTを読み取り専用トランザクションで取得する。
+- seed は `plans/` 配下の `.sql` を `psql -1` で実行し、接続先DB名・ユーザーを確認してから投入する。設定に `database.allowSeed: true` が必要。試験用データは接頭辞等で識別して「削除→登録」の冪等な形にし、全削除・DDL・psqlメタコマンド・トランザクション制御は書かない（`--validate` で検査）。
+- アプリログ（`appLog`）はローカルのログファイルの打鍵中の追記分だけを `app.log` に保存して文字列を確認する。ECサイトは `app/app-run.sh` が `app/logs/app.log`（`APP_LOG_FILE`）へ追記する。EC2内ログはAWS CLI / SSMで固定tailコマンドを実行する。S3・EC2の接続先と期待値は `config.local.json` で設定する。
 - Playwright MCP・Postgres MCPは通常の試験実行に使用しない。`.mcp.json` に自動起動するサーバーは登録しない。
-- `run-playwright-unit-test` は試験項目票1ファイル・対応表・レビュー済みspec/configの一致を確認して、その設定を指定しCLIを実行する。コード作成や期待値の修正は行わない。`_02_異常系` の障害注入は対象外。
-- 各操作は `specs/evidence.js` のstepを使用して撮影する。画面が失敗してもDB事後・AWSの収集を試み、未実施や取得エラーを成功扱いしない。
+- `run-playwright-unit-test` は試験項目票1ファイル・対応表・レビュー済みspec/config/seedの一致を確認して、その設定を指定しCLIを実行する。コード作成や期待値の修正は行わない。`_02_異常系` の障害注入は対象外。
+- 各操作は `specs/evidence.ts` のstepを使用して撮影する。seed失敗時は画面操作をせず、画面が失敗してもDB事後・アプリログ・AWSの収集を試み、未実施や取得エラーを成功扱いしない。
 - 成果物は `screen-test/runs/<UTC日時>-<ID>/` に実行単位で保存し、Git管理外。従来のMCP証跡は既存ファイルとして保持する。
-- サンプルはTodoの必須入力検証1件（`specs/todo.spec.js`・`plans/todo/`・`config.todo-local.json`）。検証用アプリをECサイトに置き換えたため、このサンプルは現状のアプリでは動かない。ローカルTodoにAWS連携はないため、ローカル設定ではS3・EC2は理由付き対象外。AWSを確認したとは扱わない。
-- DB復元・S3削除などの初期化は自動実行しない。更新系試験は別途初期状態を準備する。
+- サンプル: ECサイトの商品検索1件（`specs/ecsite-sample.spec.ts`・`plans/ecsite-sample/`。seed・複数クエリ・appLogの例）。旧Todoの必須入力検証1件（`specs/todo.spec.ts`・`plans/todo/`・`config.todo-local.json`）は現状のアプリでは動かない。ローカル設定ではS3・EC2は理由付き対象外で、AWSを確認したとは扱わない。
+- DB全体の復元・S3削除などの初期化は自動実行しない。DBの変更は設定で指定した seed のみ。
 
 ```bash
 # screen-test で実行。with-runtime.sh は .runtime/ の Node 22 とブラウザを PATH に通して引数のコマンドを実行する
-bash with-runtime.sh npm run test:unit    # runner.py の単体テスト（python3 -m unittest discover -s tests）
-bash with-runtime.sh python3 -m unittest discover -s tests -k <テスト名の一部>   # 単一テスト（例: -k test_missing_aws_configuration）
+bash with-runtime.sh npm run typecheck    # tsc による型チェック（出力なし）
+bash with-runtime.sh npm run test:unit    # runner の単体テスト（node --test "tests/unit/*.test.ts"。DB・AWS・ブラウザに接続しない）
+bash with-runtime.sh node --test --test-name-pattern "<テスト名の一部>" "tests/unit/*.test.ts"   # 単一テスト（例: "seed requires"）
 bash with-runtime.sh npm run test:list    # spec の一覧（実行はしない）
-bash with-runtime.sh npm run test:smoke   # playwright.smoke.config.js のスモーク
-bash with-runtime.sh python3 runner.py --config plans/<suite-id>/config.local.json   # 票ごとの試験実施
+bash with-runtime.sh npm run test:smoke   # playwright.smoke.config.ts のスモーク
+bash with-runtime.sh node src/runner.ts --config plans/<suite-id>/config.local.json --validate   # 設定検証のみ（接続なし）
+bash with-runtime.sh node src/runner.ts --config plans/<suite-id>/config.local.json   # 票ごとの試験実施
 ```
