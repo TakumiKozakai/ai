@@ -11,10 +11,9 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
   - `doc/詳細設計/` … 検証用アプリの設計書（設計書ベース skill の入力例）
   - `doc/templates/` … 画面設計書のテンプレート `画面設計書_{画面名称}.md`（画面項目定義／入力チェック内容／画面処理の3章構成と記述方針）
   - `app/` … 検証用アプリと、PostgreSQL の Docker 定義（`app/docker/`）
-  - `test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と CLI実行環境 `screen-test/`、`01_試験項目/`（成果物）、`02_試験結果/`（実施結果）。`claude-playwrite-unit-test/` サブディレクトリにはテンプレートと構築ガイドのみ置く
+  - `test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と CLI実行環境 `screen-test/`、画面単位の成果物を置く `01_画面/`（`00_templates/` にテンプレート、`01_試験項目/` に試験項目票、`02_試験結果/` に実施結果）
 - skill 定義は `claude-skills/.claude/skills/*/SKILL.md`、サブエージェント定義は `claude-skills/.claude/agents/*.md`。**skill を使うときは `claude-skills/` を cwd にして Claude Code を起動する**（`.claude/` がそこにあり、skill 内の相対パスもすべて `claude-skills/` 基準で解決される）。**ただし単体試験項目票の作成・レビュー・実施（`write-unit-case-*` / `review-unit-case-*` / `write-playwright-unit-test` / `run-playwright-unit-test` と `unit-case-writer` / `unit-case-reviewer` エージェント）は `claude-skills/test/01_単体試験/` に独自の `.claude/` と `.mcp.json` を持つため、これらを使うときは `test/01_単体試験/` を cwd にして Claude Code を起動する**（設計書 `../../doc/詳細設計/` やアプリ `../../app/` は相対パスで参照する）。
-- `claude-playwrite` の "playwrite" は意図的な表記揺れ。パス名として skill から参照されているため修正しない。
-- skill 一覧と工程・分類の対応表の正本は `claude-skills/@Skills要件.md`。skill を追加・改名したらこの表も更新する。
+- skill 一覧と工程・分類の対応表の正本はリポジトリルートの `@Skills要件.md`。skill を追加・改名したらこの表も更新する。
 
 ## skill アーキテクチャ
 
@@ -43,15 +42,15 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 
 ### 成果物
 
-`write-unit-case-*` は試験分類別に4ファイル `試験項目票_{画面名称}_01_正常系.md` / `_02_異常系.md` / `_03_フロントバリデーション.md` / `_04_サーババリデーション.md` を出力する（出力先は既定で `test/01_単体試験/01_試験項目/`）。分類と skill の対応は `01_正常系` = `normal-case`、`02_異常系` = `server-error`、`03_フロントバリデーション` = `front-validation`、`04_サーババリデーション` = `server-validation`。
+`write-unit-case-*` は試験分類別に4ファイル `試験項目票_{画面名称}_01_正常系.md` / `_02_異常系.md` / `_03_フロントバリデーション.md` / `_04_サーババリデーション.md` を出力する（出力先は既定で `test/01_単体試験/01_画面/01_試験項目/`）。分類と skill の対応は `01_正常系` = `normal-case`、`02_異常系` = `server-error`、`03_フロントバリデーション` = `front-validation`、`04_サーババリデーション` = `server-validation`。
 
 - **指摘反映モード**: `write-unit-case-*` は「指摘一覧」を渡されると、新規作成ではなく既存の自分の分類の試験項目票へ指摘を反映する。対象行は No. とシナリオで特定し、曖昧なら要確認事項に回す。他分類に属する行は削除せず行の全内容を添えて報告し、移動は Writer が行う。種別「削除」は Writer からの移動指示専用。
 - **集約実行**: Writer から「集約実行」と明示して呼ばれた場合、`review-unit-case-*` は HTML を作らず、指摘一覧・実行状態・要確認事項を返す。明示が無い（ユーザーが Reviewer を直接呼んだ）単体実行では、指摘が1件以上あるときだけ `試験項目票レビュー結果_{画面名称}_{分類}_設計書_{yyyyMMddHHmm}.html` を作る（0件ならチャット報告のみ）。
 
 ### 共通テンプレート
 
-- 試験項目票の雛形: `test/01_単体試験/claude-playwrite-unit-test/templates/試験項目票_{画面名称}.md`（No. 採番規則・列の記述方針もここに集約）。`write-unit-case-*` が通常モードの手順3で Read する（cwd は `test/01_単体試験/` なので skill 内では `claude-playwrite-unit-test/templates/...` と相対パスで参照する）
-- 試験結果票のスタイル: `test/01_単体試験/claude-playwrite-unit-test/templates/試験結果票_{画面名称}_{yyyyMMddHHmm}.html`。レビュー結果 HTML も同様のスタイルとする
+- 試験項目票の雛形: `test/01_単体試験/01_画面/00_templates/試験項目票_{画面名称}.md`（No. 採番規則・列の記述方針もここに集約）。`write-unit-case-*` が通常モードの手順3で Read する（cwd は `test/01_単体試験/` なので skill 内では `01_画面/00_templates/...` と相対パスで参照する）
+- 試験結果票のスタイル: `test/01_単体試験/01_画面/00_templates/試験結果票_{画面名称}_{yyyyMMddHHmm}.html`。レビュー結果 HTML も同様のスタイルとする
 
 ### skill を新規作成・改修するときの書き方
 
