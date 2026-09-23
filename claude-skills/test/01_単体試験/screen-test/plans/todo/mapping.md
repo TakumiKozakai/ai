@@ -5,18 +5,18 @@
 - 元票SHA-256: `2271b993f369f6767b2a9036e268b5dc204815daaa8563c8ab24a7f93f992b30`
 - 根拠資料: 元票、既存Todoの一覧テンプレート・TodoController・Todoエンティティ
 - 対象No.: 1（サンプル票の全件）
-- spec: `specs/todo.spec.js`
+- spec: `specs/todo.spec.ts`
 - 設定例: `plans/todo/config.example.json`
 - ローカル実行設定: `plans/todo/config.local.json`（未作成）
-- 全体状態: 実施不可（環境準備を保留中）
+- 全体状態: 実施不可（検証用アプリをECサイトに置き換えたため、現状のアプリでは動かない）
 
 この例は既存サンプルspecへの対応表。テストコードの静的確認と、実アプリ試験の合格は異なる。
 
 ## No.との対応
 
-| No. | シナリオ / test名 | 状態 | 操作→step / 画面assertion | DB前後の確認 | S3 | EC2 | 保留・対象外の理由 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | No1 タイトル未入力時は登録されない | 実装済み | 手順1→Todo一覧を開く・見出し確認、手順2→タイトルを空欄にする、手順3→追加ボタン・必須エラー表示確認。各stepで撮影 | 票に記載のtodos列をid順で取得しunchangedで比較 | ローカルアプリに連携なし・対象外 | ローカル稼働・対象外 | 実装保留なし。環境準備は未実施 |
+| No. | シナリオ / test名 | 状態 | 操作→step / 画面assertion | DB前後の確認 | アプリログ | S3 | EC2 | 保留・対象外の理由 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | No1 タイトル未入力時は登録されない | 実装済み | 手順1→Todo一覧を開く・見出し確認、手順2→タイトルを空欄にする、手順3→追加ボタン・必須エラー表示確認。各stepで撮影 | 票に記載のtodos列をid順で取得（クエリ名 `todos`）しunchangedで比較 | ローカルTodoはログファイルなし・対象外 | ローカルアプリに連携なし・対象外 | ローカル稼働・対象外 | 実装保留なし。環境準備は未実施 |
 
 ## 初期状態・認証・再実行条件
 
@@ -38,9 +38,9 @@
 
 | 検証 | 結果 | 補足 |
 | --- | --- | --- |
-| JavaScript構文 | 成功 | node --check specs/todo.spec.js |
+| TypeScript型チェック | 未検証 | npm run typecheck（TS化後に再確認） |
 | Playwright列挙とNo.の一致 | 成功 | 列挙1件、test名・No1が一致。--listのskipped表示は未実行の列挙結果であり実施済みではない |
-| 設定検証 | 成功 | python3 runner.py --config plans/todo/config.example.json --validate。接続は行っていない |
+| 設定検証 | 成功 | node src/runner.ts --config plans/todo/config.example.json --validate。接続は行っていない |
 
 ## 実施前レビュー
 

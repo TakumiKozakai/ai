@@ -1,4 +1,4 @@
-import { test, expect } from './evidence.js';
+import { test, expect } from './evidence.ts';
 
 test('No1 タイトル未入力時は登録されない', async ({ page, step }) => {
   await step('Todo一覧を開く', async () => {

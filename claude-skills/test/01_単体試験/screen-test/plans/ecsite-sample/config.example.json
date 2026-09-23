@@ -1,0 +1,36 @@
+{
+  "baseUrl": "http://localhost:8080",
+  "allowedOrigins": ["http://localhost:8080"],
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "REPLACE_WITH_POSTGRES_DB",
+    "user": "playwright_user",
+    "allowSeed": true
+  },
+  "cases": [
+    {
+      "id": "No1",
+      "spec": "ecsite-sample.spec.ts",
+      "title": "No1 キーワードで試験用商品を検索できる",
+      "seed": ["seed/01_products.sql"],
+      "database": {
+        "queries": {
+          "pw_products": "SELECT name, price, stock_quantity, is_published FROM products WHERE left(name, 3) = 'PW_' ORDER BY name"
+        },
+        "expectedBefore": {
+          "pw_products": [
+            { "name": "PW_サンプル商品 検索確認用", "price": 1234, "stock_quantity": 10, "is_published": true }
+          ]
+        },
+        "unchanged": true
+      },
+      "appLog": {
+        "path": "/REPLACE_WITH_ABSOLUTE_PATH/claude-skills/app/logs/app.log",
+        "contains": ["/api/products?", "keyword=PW_"]
+      },
+      "s3": { "notApplicable": "ECサイトはS3を使用しない" },
+      "ec2": { "notApplicable": "ローカル実施のためEC2で稼働していない。アプリログはappLogで確認する" }
+    }
+  ]
+}
