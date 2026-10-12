@@ -1,4 +1,4 @@
-// Response types of the API (doc/詳細設計/ecsite-API設計書.md).
+// APIのレスポンス型（doc/詳細設計/02_API設計書/ecsite-API一覧.md）。
 
 export interface Me {
   id: number

@@ -1,5 +1,5 @@
 -- ecsite schema (PostgreSQL 17)
--- Source: doc/詳細設計/ecsite-ER図・テーブル定義書.md
+-- 定義元: doc/基本設計/ecsite-テーブル定義書.md
 -- Executed by the postgres image's docker-entrypoint-initdb.d on first startup only
 -- (i.e. when the postgres-data volume is empty). Runs before 02_create_readonly_user.sh,
 -- so readonly_user gets SELECT on these tables.

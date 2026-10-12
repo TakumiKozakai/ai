@@ -1,10 +1,10 @@
 # ecsite 商品詳細画面設計書
 
-画面名: 商品詳細画面（SC-02）。URL: `/products/:id`。画面コンポーネント: `app/frontend/src/pages/ProductDetailPage.tsx`。使用API: A-07 `GET /api/products/:id`（`app/backend/internal/handler/product_handler.go`）、A-09 `POST /api/cart/items`（`app/backend/internal/handler/cart_handler.go`）。本書は `doc/詳細設計/ecsite-ER図・テーブル定義書.md`、`doc/詳細設計/ecsite-画面一覧・共通仕様書.md`、`doc/詳細設計/ecsite-API設計書.md` を根拠に作成した商品詳細画面単体の詳細設計書であり、実装前の新規設計である。商品一覧画面については「ecsite-商品一覧画面設計書.md」、カート画面については「ecsite-カート画面設計書.md」を参照。
+画面名: 商品詳細画面（SC-02）。URL: `/products/:id`。画面コンポーネント: `app/frontend/src/pages/ProductDetailPage.tsx`。使用API: A-07 `GET /api/products/:id`（`app/backend/internal/handler/product_handler.go`）、A-09 `POST /api/cart/items`（`app/backend/internal/handler/cart_handler.go`）。本書は `doc/基本設計/ecsite-テーブル定義書.md`、`doc/詳細設計/01_画面設計書/ecsite-画面共通仕様書.md`、[A-07 商品詳細取得API設計書](../02_API設計書/ecsite-A-07_商品詳細取得API設計書.md)、[A-09 カート追加API設計書](../02_API設計書/ecsite-A-09_カート追加API設計書.md) を根拠に作成した商品詳細画面単体の詳細設計書であり、実装前の新規設計である。商品一覧画面については「ecsite-SC-01_商品一覧画面設計書.md」、カート画面については「ecsite-SC-03_カート画面設計書.md」を参照。
 
 ## 1. 画面項目定義
 
-共通ヘッダー・画面メッセージは「ecsite-画面一覧・共通仕様書.md」の3章・5章を参照。
+共通ヘッダー・画面メッセージは「ecsite-画面共通仕様書.md」の3章・5章を参照。
 
 ### 1.1 商品情報
 
@@ -66,7 +66,7 @@ A-09 `POST /api/cart/items` 呼び出し時に以下の順でチェックする�
 
 - `/products/:id` を表示すると、A-07 `GET /api/products/:id` で商品を取得し、商品詳細画面を表示する。
 - ログイン状態（共通ヘッダーで取得した `GET /api/me` の結果）と `inStock` により、1.2 のカート投入フォームの表示を切り替える。
-- **対象商品が表示できない場合**: `:id` が数値でない場合はAPIを呼び出さず、A-07 が `404` を返した場合（存在しない・非公開）はそのまま、「ページが見つかりません」画面を表示する（「ecsite-画面一覧・共通仕様書.md」の6章）。
+- **対象商品が表示できない場合**: `:id` が数値でない場合はAPIを呼び出さず、A-07 が `404` を返した場合（存在しない・非公開）はそのまま、「ページが見つかりません」画面を表示する（「ecsite-画面共通仕様書.md」の6章）。
 
 ### 3.3 カートに入れる（正常時／エラー時）
 
@@ -79,7 +79,7 @@ A-09 `POST /api/cart/items` 呼び出し時に以下の順でチェックする�
 
 ### 3.4 ログイン画面への遷移
 
-- 未ログイン時にログイン誘導リンクを押下すると `/login` へ遷移する。ログインに成功すると、この商品詳細画面に戻る（「ecsite-画面一覧・共通仕様書.md」の4.4）。
+- 未ログイン時にログイン誘導リンクを押下すると `/login` へ遷移する。ログインに成功すると、この商品詳細画面に戻る（「ecsite-画面共通仕様書.md」の4.4）。
 
 ### 3.5 商品一覧画面への遷移
 
@@ -87,4 +87,4 @@ A-09 `POST /api/cart/items` 呼び出し時に以下の順でチェックする�
 
 ### 3.6 例外発生時の共通事項
 
-- A-07・A-09 が `500` を返した場合、またはバックエンドに接続できない場合は、「ecsite-画面一覧・共通仕様書.md」の6章のとおりシステムエラー画面を表示する。カート投入処理はロールバックされ、カートは変更されない。
+- A-07・A-09 が `500` を返した場合、またはバックエンドに接続できない場合は、「ecsite-画面共通仕様書.md」の6章のとおりシステムエラー画面を表示する。カート投入処理はロールバックされ、カートは変更されない。

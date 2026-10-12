@@ -1,4 +1,4 @@
-// Package handler implements the JSON API (doc/詳細設計/ecsite-API設計書.md).
+// Package handler はJSON APIを実装する（doc/詳細設計/02_API設計書/ecsite-API一覧.md）。
 package handler
 
 import (

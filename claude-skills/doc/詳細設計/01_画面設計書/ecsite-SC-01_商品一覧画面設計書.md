@@ -1,10 +1,10 @@
 # ecsite 商品一覧画面設計書
 
-画面名: 商品一覧画面（SC-01）。URL: `/products`（`/` から遷移した場合も同一画面）。画面コンポーネント: `app/frontend/src/pages/ProductListPage.tsx`。使用API: A-05 `GET /api/categories`、A-06 `GET /api/products`（`app/backend/internal/handler/product_handler.go`）。本書は `doc/詳細設計/ecsite-ER図・テーブル定義書.md`、`doc/詳細設計/ecsite-画面一覧・共通仕様書.md`、`doc/詳細設計/ecsite-API設計書.md` を根拠に作成した商品一覧画面単体の詳細設計書であり、実装前の新規設計である。商品詳細画面については「ecsite-商品詳細画面設計書.md」を参照。
+画面名: 商品一覧画面（SC-01）。URL: `/products`（`/` から遷移した場合も同一画面）。画面コンポーネント: `app/frontend/src/pages/ProductListPage.tsx`。使用API: A-05 `GET /api/categories`、A-06 `GET /api/products`（`app/backend/internal/handler/product_handler.go`）。本書は `doc/基本設計/ecsite-テーブル定義書.md`、`doc/詳細設計/01_画面設計書/ecsite-画面共通仕様書.md`、[A-05 カテゴリ一覧取得API設計書](../02_API設計書/ecsite-A-05_カテゴリ一覧取得API設計書.md)、[A-06 商品検索API設計書](../02_API設計書/ecsite-A-06_商品検索API設計書.md) を根拠に作成した商品一覧画面単体の詳細設計書であり、実装前の新規設計である。商品詳細画面については「ecsite-SC-02_商品詳細画面設計書.md」を参照。
 
 ## 1. 画面項目定義
 
-共通ヘッダー・画面メッセージは「ecsite-画面一覧・共通仕様書.md」の3章・5章を参照。
+共通ヘッダー・画面メッセージは「ecsite-画面共通仕様書.md」の3章・5章を参照。
 
 ### 1.1 検索フォーム
 
@@ -87,8 +87,8 @@
 
 ### 3.3 商品詳細画面への遷移
 
-- 商品名リンク押下により `/products/{id}` へ遷移する（画面としては「ecsite-商品詳細画面設計書.md」を参照）。
+- 商品名リンク押下により `/products/{id}` へ遷移する（画面としては「ecsite-SC-02_商品詳細画面設計書.md」を参照）。
 
 ### 3.4 例外発生時の共通事項
 
-- A-05・A-06 が `500` を返した場合、またはバックエンドに接続できない場合は、「ecsite-画面一覧・共通仕様書.md」の6章のとおりシステムエラー画面を表示する。
+- A-05・A-06 が `500` を返した場合、またはバックエンドに接続できない場合は、「ecsite-画面共通仕様書.md」の6章のとおりシステムエラー画面を表示する。

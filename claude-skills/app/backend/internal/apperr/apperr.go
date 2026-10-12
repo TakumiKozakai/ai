@@ -1,5 +1,5 @@
-// Package apperr defines API errors returned to the client in the common error format
-// (see doc/詳細設計/ecsite-API設計書.md 1.2).
+// Package apperr は共通形式でクライアントに返すAPIエラーを定義する。
+// doc/詳細設計/02_API設計書/ecsite-API共通仕様書.md の1.2を参照。
 package apperr
 
 import "net/http"

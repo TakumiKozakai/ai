@@ -1,5 +1,5 @@
-// API client for the backend (doc/詳細設計/ecsite-API設計書.md).
-// Every request carries X-Requested-With (CSRF countermeasure, common spec 4.3).
+// バックエンドのAPIクライアント（doc/詳細設計/02_API設計書/ecsite-API一覧.md）。
+// 全リクエストにX-Requested-Withを付ける（API共通仕様書の2.3、CSRF対策）。
 
 export class ApiError extends Error {
   readonly status: number

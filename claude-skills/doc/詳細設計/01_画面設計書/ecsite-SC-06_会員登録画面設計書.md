@@ -1,10 +1,10 @@
 # ecsite 会員登録画面設計書
 
-画面名: 会員登録画面（SC-06）。URL: `/signup`。画面コンポーネント: `app/frontend/src/pages/SignupPage.tsx`。使用API: A-02 `POST /api/auth/signup`（`app/backend/internal/handler/auth_handler.go`）。登録処理はバックエンドの `app/backend/internal/service/user_service.go` で行う。本書は `doc/詳細設計/ecsite-ER図・テーブル定義書.md`、`doc/詳細設計/ecsite-画面一覧・共通仕様書.md`、`doc/詳細設計/ecsite-API設計書.md` を根拠に作成した会員登録画面単体の詳細設計書であり、実装前の新規設計である。ログイン画面については「ecsite-ログイン画面設計書.md」を参照。
+画面名: 会員登録画面（SC-06）。URL: `/signup`。画面コンポーネント: `app/frontend/src/pages/SignupPage.tsx`。使用API: A-02 `POST /api/auth/signup`（`app/backend/internal/handler/auth_handler.go`）。登録処理はバックエンドの `app/backend/internal/service/user_service.go` で行う。本書は `doc/基本設計/ecsite-テーブル定義書.md`、`doc/詳細設計/01_画面設計書/ecsite-画面共通仕様書.md`、[A-02 会員登録API設計書](../02_API設計書/ecsite-A-02_会員登録API設計書.md) を根拠に作成した会員登録画面単体の詳細設計書であり、実装前の新規設計である。ログイン画面については「ecsite-SC-07_ログイン画面設計書.md」を参照。
 
 ## 1. 画面項目定義
 
-共通ヘッダーは「ecsite-画面一覧・共通仕様書.md」の3章を参照。
+共通ヘッダーは「ecsite-画面共通仕様書.md」の3章を参照。
 
 | 表示名（論理名） | 種別 | 必須性 | 初期値／表示内容 | 操作可否 | 備考 |
 |---|---|---|---|---|---|
@@ -62,7 +62,7 @@ A-02 `POST /api/auth/signup` 呼び出し時にチェックする。エラー時
 ### 3.1 遷移元
 
 - 共通ヘッダーの会員登録リンク、ログイン画面の会員登録リンクから遷移する。
-- **ログイン中の場合**: 画面を表示せず `/products` へ遷移する（「ecsite-画面一覧・共通仕様書.md」の4.4）。
+- **ログイン中の場合**: 画面を表示せず `/products` へ遷移する（「ecsite-画面共通仕様書.md」の4.4）。
 
 ### 3.2 初期表示
 
@@ -81,4 +81,4 @@ A-02 `POST /api/auth/signup` 呼び出し時にチェックする。エラー時
 
 ### 3.5 例外発生時の共通事項
 
-- A-02 が `500` を返した場合、またはバックエンドに接続できない場合は、「ecsite-画面一覧・共通仕様書.md」の6章のとおりシステムエラー画面を表示する。ユーザーは作成されない。
+- A-02 が `500` を返した場合、またはバックエンドに接続できない場合は、「ecsite-画面共通仕様書.md」の6章のとおりシステムエラー画面を表示する。ユーザーは作成されない。

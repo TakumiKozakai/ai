@@ -8,7 +8,8 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 
 - 本体は `claude-skills/`。ルートの `docs/`（と、作られた場合の `codex/`）はコミットしない一時置き場。`.gitignore` には入れていないため `git status` に未追跡として表示されるが、`git add` の対象に含めない。
 - `claude-skills/` 配下は `app/`・`doc/`・`test/` の3ディレクトリ（工程別の番号付きディレクトリは廃止）。実体があるのは以下。`test/02_結合試験/`・`test/03_総合試験/` は `.gitkeep` のみの空ディレクトリ。
-  - `doc/詳細設計/` … 検証用アプリの設計書（設計書ベース skill の入力例）
+  - `doc/基本設計/` … ECサイトのシステム構成設計書・ER図・テーブル定義書
+  - `doc/詳細設計/` … `01_画面設計書/`（画面一覧・画面共通仕様・各画面設計書）、`02_API設計書/`（API一覧・API共通仕様・APIごとの設計書）、`03_バッチ設計書/`（現状は空）
   - `doc/templates/` … 画面設計書のテンプレート `画面設計書_{画面名称}.md`（画面項目定義／入力チェック内容／画面処理の3章構成と記述方針）
   - `app/` … 検証用アプリと、PostgreSQL の Docker 定義（`app/docker/`）
   - `test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と CLI実行環境 `screen-test/`、画面単位の成果物を置く `01_画面/`（`00_templates/` にテンプレート、`01_試験項目/` に試験項目票、`02_試験結果/` に実施結果）
@@ -65,7 +66,7 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 
 ## 検証用アプリ（`claude-skills/app/`）
 
-- ECサイト（商品一覧・検索・カート・購入・会員登録）。設計書は `doc/詳細設計/ecsite-*.md`（API は `ecsite-API設計書.md`、構成・認証は `ecsite-画面一覧・共通仕様書.md`）。旧 Todo アプリの設計書 `todo-app*.md` も残っている。
+- ECサイト（商品一覧・検索・カート・購入・会員登録）。基本設計は `doc/基本設計/`、画面設計は `doc/詳細設計/01_画面設計書/`、API設計は `doc/詳細設計/02_API設計書/`。旧Todoの設計書は削除済みで、現在のアプリにTodo実装はない。
 - フロントエンド `frontend/`: React 19 / TypeScript / Vite / React Router の SPA。API 呼び出しは `src/api/client.ts` に集約し、全リクエストに `X-Requested-With: XMLHttpRequest` を付ける。
 - バックエンド `backend/`: Go / Gin / GORM / PostgreSQL 17（Docker）。`handler`（入力チェック）→ `service`（業務ロジック・トランザクション）→ `repository` → `model` 構成。認証は JWT を HttpOnly Cookie `ecsite_token` に入れる。
 - スキーマと初期データは `docker/postgresql/initdb/`（`01_init.sql`・`03_seed.sql`）で作成し、GORM の `AutoMigrate` は使わない。initdb はボリュームが空の初回起動時のみ実行されるため、変更したら `docker/DB再作成手順.md` に従って作り直す。

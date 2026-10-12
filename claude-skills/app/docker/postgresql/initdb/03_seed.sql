@@ -1,4 +1,4 @@
--- ecsite initial data: categories and products (no admin screen, see ecsite-画面一覧・共通仕様書.md 1.1).
+-- ECサイトの初期データ（カテゴリ・商品）。管理画面は対象外（doc/基本設計/ecsite-システム構成設計書.md の1.1を参照）。
 -- Executed on first startup only, after 01_init.sql and 02_create_readonly_user.sh.
 --
 -- Products for checking each screen:

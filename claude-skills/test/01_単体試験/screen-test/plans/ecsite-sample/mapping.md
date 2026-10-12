@@ -2,7 +2,7 @@
 
 - suite-id: `ecsite-sample`
 - 元票: なし（ツールの seed・複数クエリ・appLog の動作確認用に作ったサンプル。試験項目票から生成したものではない）
-- 根拠資料: `../../doc/詳細設計/ecsite-商品一覧画面設計書.md`（検索フォーム・件数表示・価格表示）、`app/frontend/src/pages/ProductListPage.tsx`（キーワード入力欄の `aria-label="キーワード"`）、`app/docker/postgresql/initdb/01_init.sql`（products 列）
+- 根拠資料: `../../doc/詳細設計/01_画面設計書/ecsite-SC-01_商品一覧画面設計書.md`（検索フォーム・件数表示・価格表示）、`app/frontend/src/pages/ProductListPage.tsx`（キーワード入力欄の `aria-label="キーワード"`）、`app/docker/postgresql/initdb/01_init.sql`（products 列）
 - 対象No.: 1
 - spec: `specs/ecsite-sample.spec.ts`
 - 設定例: `plans/ecsite-sample/config.example.json`
