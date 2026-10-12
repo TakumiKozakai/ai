@@ -6,7 +6,7 @@
 
 | ディレクトリ | 内容 |
 |---|---|
-| `claude-skills/.claude/` | 設計書からの実装・コードレビューのスキル |
+| `.claude/` | 設計書からの実装・コードレビューのスキル |
 | `claude-skills/doc/` | 検証用アプリの設計書（`詳細設計/`）と画面設計書テンプレート（`templates/`） |
 | `claude-skills/app/` | 検証用 ECサイトアプリ（フロントエンド React、バックエンド Go、DB PostgreSQL） |
 | `claude-skills/test/01_単体試験/` | 単体試験項目票の作成・レビュー・実施のスキル／エージェントと、画面試験ツール |

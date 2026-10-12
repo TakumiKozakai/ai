@@ -14,7 +14,7 @@ description: 設計書ファイルパス・比較基準となるコミットID�
    - 差分が無い場合は、その旨を報告して終了する（レビューは実施しない）
 4. 設計書が属するリポジトリのHEAD時点の設計書ファイルの内容を、一致確認・文脈理解のために参照する（未コミットの変更は含めない）
    - HEAD時点で設計書ファイルが存在しない・リネームされている場合や、設計書がGit管理外の場合はユーザーに確認する
-5. 以下4つのskillのSKILL.mdを順に読み込み、その手順に従って同じ設計書ファイルパス・コミットID・実装先プロジェクトのルートディレクトリを渡して実行し、各観点の指摘事項と実行状態（成功/失敗）を収集する（`.claude/skills/` は claude-skills/ を基準に解決する）
+5. 以下4つのskillのSKILL.mdを順に読み込み、その手順に従って同じ設計書ファイルパス・コミットID・実装先プロジェクトのルートディレクトリを渡して実行し、各観点の指摘事項と実行状態（成功/失敗）を収集する（`.claude/skills/` はリポジトリルートを基準に解決する）
    1. `.claude/skills/review-implementation-against-design-doc/SKILL.md`
    2. `.claude/skills/review-implementation-for-bugs/SKILL.md`
    3. `.claude/skills/review-implementation-for-performance/SKILL.md`

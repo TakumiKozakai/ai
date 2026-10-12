@@ -13,7 +13,7 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
   - `doc/templates/` … 画面設計書のテンプレート `画面設計書_{画面名称}.md`（画面項目定義／入力チェック内容／画面処理の3章構成と記述方針）
   - `app/` … 検証用アプリと、PostgreSQL の Docker 定義（`app/docker/`）
   - `test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と CLI実行環境 `screen-test/`、画面単位の成果物を置く `01_画面/`（`00_templates/` にテンプレート、`01_試験項目/` に試験項目票、`02_試験結果/` に実施結果）
-- skill 定義は `claude-skills/.claude/skills/*/SKILL.md`、サブエージェント定義は `claude-skills/.claude/agents/*.md`。**skill を使うときは `claude-skills/` を cwd にして Claude Code を起動する**（`.claude/` がそこにあり、skill 内の相対パスもすべて `claude-skills/` 基準で解決される）。**ただし単体試験項目票の作成・レビュー・実施（`write-unit-case-*` / `review-unit-case-*` / `write-playwright-unit-test` / `run-playwright-unit-test` と `unit-case-writer` / `unit-case-reviewer` エージェント）は `claude-skills/test/01_単体試験/` に独自の `.claude/` と `.mcp.json` を持つため、これらを使うときは `test/01_単体試験/` を cwd にして Claude Code を起動する**（設計書 `../../doc/詳細設計/` やアプリ `../../app/` は相対パスで参照する）。
+- skill 定義は `.claude/skills/*/SKILL.md`、サブエージェント定義は `.claude/agents/*.md`（いずれもリポジトリルート）。**skill を使うときはリポジトリルートを cwd にして Claude Code を起動する**（`.claude/` がそこにあり、skill 内の相対パスもリポジトリルート基準で解決される）。**ただし単体試験項目票の作成・レビュー・実施（`write-unit-case-*` / `review-unit-case-*` / `write-playwright-unit-test` / `run-playwright-unit-test` と `unit-case-writer` / `unit-case-reviewer` エージェント）は `claude-skills/test/01_単体試験/` に独自の `.claude/` と `.mcp.json` を持つため、これらを使うときは `test/01_単体試験/` を cwd にして Claude Code を起動する**（設計書 `../../doc/詳細設計/` やアプリ `../../app/` は相対パスで参照する）。
 - skill 一覧と工程・分類の対応表の正本はリポジトリルートの `@Skills要件.md`。skill を追加・改名したらこの表も更新する。
 
 ## skill アーキテクチャ
@@ -62,7 +62,7 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 - 末尾に「スコープ外」セクションを置き、他 skill との境界を明記する。
 - 試験項目票では画面要素を物理名（id・class）ではなく論理名（表示ラベル・ボタン文言）で書く。No. は画面内 1 始まりの連番で、実行可能な順（非永続→登録→境界値→削除・0件確認を最後）に並べる。
 - 実装・レビュー系 skill は「実装先プロジェクトは設計書の場所と一致しない」前提でユーザーに確認する。差分系（`-diff`、`review-implementation`）は比較基準のコミット ID を自動提案しない。
-- skill から他の skill・テンプレートのパスは `claude-skills/` 基準の `.claude/skills/...` で書く。
+- skill から他の skill・テンプレートのパスは リポジトリルート基準の `.claude/skills/...` で書く。
 
 ## 検証用アプリ（`claude-skills/app/`）
 
