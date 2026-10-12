@@ -10,7 +10,7 @@ Claude Code 用の skill 群（設計書からの実装・レビュー・単体�
 - `ec-site/` 配下は `ec-site-web/`（旧 `app/`）・`docker/`・`ec-site-test/` が実体。`ec-site-common/`・`ec-site-batch/`・`ec-site-infra/` は `.gitkeep` のみの空ディレクトリ。`ec-site-test/02_結合試験/`・`03_総合試験/` も `.gitkeep` のみ。
   - `ec-site-docs/基本設計/` … ECサイトのシステム構成設計書・ER図・テーブル定義書
   - `ec-site-docs/詳細設計/` … `01_画面設計書/`（画面一覧・画面共通仕様・各画面設計書）、`02_API設計書/`（API一覧・API共通仕様・APIごとの設計書）、`03_バッチ設計書/`（現状は空）
-  - `ec-site-docs/templates/` … 画面設計書のテンプレート `画面設計書_{画面名称}.md`（画面項目定義／入力チェック内容／画面処理の3章構成と記述方針）
+  - `ec-site-docs/テンプレート/` … 画面設計書のテンプレート `画面設計書_{画面名称}.md`（画面項目定義／入力チェック内容／画面処理の3章構成と記述方針）
   - `ec-site/ec-site-web/` … 検証用アプリ（フロントエンド・バックエンド）。`ec-site/docker/` … PostgreSQL の Docker 定義
   - `ec-site/ec-site-test/01_単体試験/` … 単体試験項目票の作成・レビュー・実施 skill／エージェント一式（`.claude/`）と CLI実行環境 `screen-test/`、画面単位の成果物を置く `01_画面/`（`00_templates/` にテンプレート、`01_試験項目/` に試験項目票、`02_試験結果/` に実施結果）
 - skill 定義は `.claude/skills/*/SKILL.md`、サブエージェント定義は `.claude/agents/*.md`（いずれもリポジトリルート）。**skill を使うときはリポジトリルートを cwd にして Claude Code を起動する**（`.claude/` がそこにあり、skill 内の相対パスもリポジトリルート基準で解決される）。**ただし単体試験項目票の作成・レビュー・実施（`write-unit-case-*` / `review-unit-case-*` / `write-playwright-unit-test` / `run-playwright-unit-test` と `unit-case-writer` / `unit-case-reviewer` エージェント）は `ec-site/ec-site-test/01_単体試験/` に独自の `.claude/` と `.mcp.json` を持つため、これらを使うときは `ec-site/ec-site-test/01_単体試験/` を cwd にして Claude Code を起動する**（設計書 `../../../ec-site-docs/詳細設計/` やアプリ `../../ec-site-web/` は相対パスで参照する）。
