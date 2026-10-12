@@ -33,21 +33,27 @@
 | | | 入力チェック（サーバ） | review-unit-case-server-validation | 同上。`_04_サーババリデーション.md` をRvする |
 | 単体試験コード作成 | 画面 | 正常系・入力チェック | write-playwright-unit-test | 試験項目票からPlaywrightコード・DB/AWS確認設定・No.対応表を作成する。実施・外部接続は行わない |
 | 単体試験実施 | | | run-playwright-unit-test | 試験項目票（1ファイル）をもとに試験実施する。`_02_異常系` は対象外 |
+| Issue対応 | 統合 | | issue-worker（エージェント） | **ユーザーの入口**。GitHub Issue を理解して計画を立て、issue-reviewer の計画Rv→ユーザー承認→実装→成果物Rv→（確認後）commit・push・PR作成・Issueコメントまで行う。Sonnet |
+| Issue対応Rv | 統合 | | issue-reviewer（エージェント） | 計画と成果物をRvする。issue-worker から1起動され、計画Rvから成果物Rvまで同じ Reviewer が続けてRvする。編集不可。Opus |
+| Issue対応（手順書） | 計画 | | plan-issue | issue-worker が実行する手順書。Issue とコードから作業計画書 `計画.md` を作成し、指摘一覧を渡されれば反映する。ユーザーは直接呼ばない |
+| | 実装 | | implement-issue | 同上。承認済みの計画に従って実装し、テスト・lint を実行する。指摘一覧を渡されれば反映する |
+| Issue対応Rv（手順書） | 計画 | | review-issue-plan | issue-reviewer が実行する手順書。計画書を Issue・コードと突き合わせてRvし、判定（承認／差戻し）を返す |
+| | 成果物 | | review-issue-implementation | 同上。基準コミットからの差分（未コミット含む）を Issue要求・計画一致・潜在バグ・性能・セキュリティ・テストの観点でRvする |
 
 ## 使い方
 
-単体試験関連（`unit-case-writer` / `unit-case-reviewer` / `write-unit-case-*` / `review-unit-case-*` / `write-playwright-unit-test` / `run-playwright-unit-test`）は `claude-skills/test/01_単体試験/` に `.claude/` と `.mcp.json` を持つため、**`test/01_単体試験/` を cwd にして Claude Code を起動する**（`implement-from-design-doc` 等それ以外の skill は従来どおり `claude-skills/` が cwd）。
+単体試験関連（`unit-case-writer` / `unit-case-reviewer` / `write-unit-case-*` / `review-unit-case-*` / `write-playwright-unit-test` / `run-playwright-unit-test`）は `ec-site/ec-site-test/01_単体試験/` に `.claude/` と `.mcp.json` を持つため、**`ec-site/ec-site-test/01_単体試験/` を cwd にして Claude Code を起動する**（`implement-from-design-doc` 等それ以外の skill は従来どおりリポジトリルートが cwd）。
 
 ### unit-case-writer（エージェント）
 
 #### 使い方
 
 - `test/01_単体試験/` を cwd にしたセッションで、設計書パスを添えて Writer に依頼する。分類は指定しない（常に4分類すべてを作る）
-  - 例: `unit-case-writer で ../../doc/詳細設計/todo-app一覧画面設計書.md の試験項目票を作って`
-  - 例: `@"unit-case-writer (agent)" 設計書: ../../doc/詳細設計/todo-app一覧画面設計書.md`
+  - 例: `unit-case-writer で ../../../ec-site-docs/詳細設計/todo-app一覧画面設計書.md の試験項目票を作って`
+  - 例: `@"unit-case-writer (agent)" 設計書: ../../../ec-site-docs/詳細設計/todo-app一覧画面設計書.md`
 - 入力: 設計書ファイルパス（必須）、出力先ディレクトリ（省略可。省略時は `01_画面/01_試験項目/`＝`test/01_単体試験/01_画面/01_試験項目/`）、画面名称（省略可）、対象画面機能（イベント。省略可。例:「画面初期表示」「登録ボタン押下」）
   - 対象画面機能を指定すると、4分類ともその機能に絞って作成・レビューする。既存の票があれば該当機能の行だけをマージ（追加・更新。既存行の更新時は上書き可否を確認）し、他機能の既存行は保持する。画面全体の網羅性は保証しない
-  - 例: `unit-case-writer で ../../doc/詳細設計/todo-app一覧画面設計書.md の試験項目票を、対象画面機能「登録ボタン押下」に絞って作って`
+  - 例: `unit-case-writer で ../../../ec-site-docs/詳細設計/todo-app一覧画面設計書.md の試験項目票を、対象画面機能「登録ボタン押下」に絞って作って`
 - 「作成して」以外の指示（分類の限定、ソースの参照等）は受け付けない（無視して最終報告に記載する）
 - Writer は判断が必要になると `【要判断】` を返して止まる。メインセッションがその内容をユーザーに確認し、回答を「確認済み回答」（判断できないものは「保留」、やめるなら「中止」）として Writer に `SendMessage` で送ると、止まった位置から再開する
 
@@ -66,7 +72,7 @@
 
 - 通常は unit-case-writer から呼ばれるため、ユーザーが意識する必要は無い
 - 既存の試験票を単体でRvしたいときは、`test/01_単体試験/` を cwd にしたセッションで直接呼ぶ
-  - 例: `unit-case-reviewer で 01_画面/01_試験項目/試験項目票_Todo一覧画面_01_正常系.md を ../../doc/詳細設計/todo-app一覧画面設計書.md でレビューして`
+  - 例: `unit-case-reviewer で 01_画面/01_試験項目/試験項目票_Todo一覧画面_01_正常系.md を ../../../ec-site-docs/詳細設計/todo-app一覧画面設計書.md でレビューして`
 - 入力: 設計書ファイルパス（必須）、試験項目票ディレクトリ（省略可。省略時は `01_画面/01_試験項目/`＝`test/01_単体試験/01_画面/01_試験項目/`）、画面名称（省略可）、レビュー対象の分類またはファイル名（省略時はディレクトリにある担当ファイルすべて）、確認済み回答
 
 #### 詳細
@@ -193,7 +199,7 @@
 #### 使い方
 
 - `test/01_単体試験/` をcwdにし、試験項目票1ファイルを渡す。
-- 例: `write-playwright-unit-test で 01_画面/01_試験項目/試験項目票_Todo一覧画面_04_サーババリデーション.md からテストコードを作って。アプリソースは ../../app、suite-idは todo-server-validation`
+- 例: `write-playwright-unit-test で 01_画面/01_試験項目/試験項目票_Todo一覧画面_04_サーババリデーション.md からテストコードを作って。アプリソースは ../../ec-site-web、suite-idは todo-server-validation`
 - 入力: 試験項目票（必須）、アプリソース・設計書・設定例・suite-id・対象No.・確認済み回答（任意）。
 
 #### 詳細
@@ -220,6 +226,67 @@
 - `_02_異常系` の障害注入は対象外。準備不足や未対応項目を別試験で代用しない。
 - 成果物は `screen-test/runs/<run-id>/`。No.単位で合否・未実施を集約し、確認対象外を成功扱いしない。
 - テストコードの生成・修正、依存導入・疎通確認は行わない。修正は作成スキルへ戻す。
+
+### issue-worker（エージェント）
+
+#### 使い方
+
+- Issue対応の4 skill と2エージェントは `~/.claude/`（`agents/issue-*.md`・`skills/{plan-issue,implement-issue,review-issue-plan,review-issue-implementation}/`）に置いており、このリポジトリの Git 管理外。cwd を問わずどのプロジェクトでも使える
+- 対象リポジトリを cwd にしたセッションで、Issue番号またはURLを添えて Worker に依頼する
+  - 例: `issue-worker で Issue #26 を対応して`
+  - 例: `@"issue-worker (agent)" https://github.com/{owner}/{repo}/issues/26`
+- 入力: Issue番号またはURL（必須）、対象リポジトリのパス（省略時はカレントディレクトリ）、Workerモデル・Reviewerモデル（省略可）
+- モデル指定: 依頼文に `Workerモデル: {値}`・`Reviewerモデル: {値}` を書く（値は `sonnet` / `opus` / `haiku` / `fable`。省略時は各エージェント定義の既定＝Worker は sonnet、Reviewer は opus）
+  - 例: `issue-worker で Issue #26 を対応して。Workerモデル: sonnet、Reviewerモデル: opus`
+  - Workerモデルはメインセッションが Worker 起動時に、Reviewerモデルは Worker が Reviewer 起動時に、それぞれ Agent ツールの `model` で指定する
+  - 指定できるのは別名だけで、モデルIDは指定できない。別名の解決先は `settings.json` の `ANTHROPIC_DEFAULT_{OPUS|SONNET|HAIKU}_MODEL` 等で置き換えられるので注意する
+- 前提: `gh` がインストール・認証済みであること
+- Worker は以下で必ず `【要判断】` を返して止まる。メインセッションがユーザーに確認し、回答を「確認済み回答」（判断できないものは「保留」、やめるなら「中止」）として Worker に `SendMessage` で送ると、止まった位置から再開する
+  - 実装前の承認ゲート: Reviewer が承認した計画で実装してよいか、計画を Issue にコメントするか
+  - 公開ゲート: commit・push・PR作成・Issueコメントをそれぞれ行ってよいか（コミットメッセージ・PR本文・コメント文案を提示）
+  - その他: 既存の未コミット変更がある、Issue の不明点、計画からの逸脱、テストが解消しない、失敗時の対応
+
+#### 詳細
+
+- 流れ: (1) 準備（git・gh の状態確認、プロジェクトの CLAUDE.md の規約把握）→ (2) `plan-issue` で計画書作成 → (3) `issue-reviewer` を Agent ツールで起動して計画Rv、差戻しは `plan-issue` の指摘反映モードで反映し `SendMessage` で再Rv（最大3回）→ (4) ユーザー承認ゲート → (5) ブランチ作成（規約が無ければ `feature/{番号}-{要約}`）、`implement-issue` で実装・テスト → (6) 同じ Reviewer に `SendMessage` で成果物Rv、指摘反映→再Rv（最大3回）→ (7) 公開ゲート → (8) 最終報告
+- 作業用ファイルは `~/.claude/issue-work/{owner}_{repo}/{Issue番号}/`（`計画.md`・`レビュー記録.md`・PR本文等）に置き、対象リポジトリには置かない
+- commit は今回の作業で変更・追加したファイルだけを個別指定する（`git add -A` は使わない）。force push・`--no-verify` は使わない
+- 終了状態: 完了（PR作成まで）／公開せず終了／要確認事項待ちで中断／ユーザー中止
+- メイン → Worker → Reviewer の2階層の入れ子を使う。`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` を 1 にしていると動かない
+
+### issue-reviewer（エージェント）
+
+#### 使い方
+
+- issue-worker から呼ばれるため、ユーザーが意識する必要は無い
+
+#### 詳細
+
+- レビュー種別（計画レビュー／成果物レビュー）に応じて `review-issue-plan` / `review-issue-implementation` を Skill ツールで実行し、判定（承認／差戻し）・指摘一覧（種別・重大度・対象・指摘内容・根拠）・要確認事項を返す
+- 1起動で計画Rvから成果物Rvまで担当する。`SendMessage` で再Rvを依頼されたときは、記憶ではなく Issue・計画書・差分を再取得・再読し、前回指摘の解消も確認する
+- `Edit` / `Write` / `NotebookEdit` / `Agent` は禁止。Bash は読み取り専用の git / gh コマンドのみ。テスト・ビルドは実行せず、Worker から渡された結果を確認する
+
+### plan-issue / implement-issue（手順書）
+
+#### 使い方
+
+- issue-worker が Skill ツールで実行する手順書（`user-invocable: false`）。ユーザーは直接呼ばない
+
+#### 詳細
+
+- `plan-issue`: `gh issue view --comments` で Issue を取得し、コードを調査して `計画.md`（要求の理解／確認済み回答／変更方針／変更ファイル／影響範囲／テスト方針／リスク／スコープ外／要確認事項）を作成する。指摘反映モードでは計画書に指摘を反映し、反映できないものは見送り（理由付き）・要確認事項として返す
+- `implement-issue`: 承認済み計画に従って実装し、テストを追加・更新してテスト・lint を実行する。計画外の変更・破壊的操作が必要になったら「要判断」で返す。commit・push は行わない。指摘反映モードでは指摘を反映してテストを再実行する
+
+### review-issue-plan / review-issue-implementation（手順書）
+
+#### 使い方
+
+- issue-reviewer が Skill ツールで実行する手順書（`user-invocable: false`）。ユーザーは直接呼ばない
+
+#### 詳細
+
+- `review-issue-plan`: 要求漏れ・要求誤り・実現性・影響範囲漏れ・テスト不足・リスク・スコープ逸脱・記述不備の観点でRvする。指摘0件かつ要確認事項0件で「承認」
+- `review-issue-implementation`: `git diff {基準コミット}`（未コミット含む）と新規ファイルを、要求未達・計画不一致・潜在バグ・性能・セキュリティ・テスト・保守性の観点でRvする。指摘0件・要確認事項0件・テスト/lint成功で「承認」。設計書とコミット済み差分を前提とする `review-implementation` とは別物
 
 ### Skill名
 
